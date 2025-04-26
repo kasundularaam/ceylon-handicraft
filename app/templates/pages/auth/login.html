@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block title %}Login - Ceylon Handicrafts{% endblock
+%} {% block module_imports %} import '/static/js/utils/auth_utils.js'; import
+'/static/js/utils/api_utils.js'; import
+'/static/js/components/auth/login-form.js'; {% endblock %} {% block content %}
+<div
+  class="auth-page"
+  style="background-image: url('/static/images/auth_featuring.jpg')"
+>
+  <div class="auth-container">
+    <div class="logo-container">
+      <img
+        src="/static/images/logo.png"
+        alt="Ceylon Handicrafts"
+        class="auth-logo"
+      />
+    </div>
+    <login-form></login-form>
+  </div>
+</div>
+
+<style>
+  /* This will fix the white margin issue */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+  }
+
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .auth-page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+  }
+
+  .auth-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(62, 39, 35, 0.8);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .logo-container {
+    margin-bottom: 2rem;
+  }
+
+  .auth-logo {
+    max-width: 300px;
+    height: auto;
+  }
+</style>
+{% endblock %}
