@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block title %}Categories - Ceylon Handicrafts
+Admin{% endblock %} {% block module_imports %} import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
+'/static/js/components/admin/admin-navbar.js'; import
+'/static/js/components/admin/category-list.js'; {% endblock %} {% block content
+%}
+<div class="admin-page">
+  <admin-navbar></admin-navbar>
+
+  <div class="admin-content">
+    <div class="page-header">
+      <h1>Categories</h1>
+      <a href="/admin/categories/new" class="add-button">
+        <i class="fas fa-plus"></i> Add New Category
+      </a>
+    </div>
+
+    <category-list></category-list>
+  </div>
+</div>
+
+<style>
+  /* Reset margins and padding */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+  }
+
+  .admin-page {
+    min-height: 100vh;
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .admin-content {
+    padding: 1.5rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .add-button {
+    background-color: #ffd700;
+    color: #3e2723;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .add-button:hover {
+    background-color: #f0c800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+</style>
+{% endblock %}

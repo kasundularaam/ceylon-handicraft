@@ -39,9 +39,13 @@ async def address_page(request: Request, userid: str, role: str):
 
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
+    from datetime import datetime
     return templates.TemplateResponse(
         "pages/admin/dashboard.html",
-        {"request": request}
+        {
+            "request": request,
+            "current_date": datetime.now().strftime("%A, %d %B %Y")
+        }
     )
 
 
@@ -50,4 +54,29 @@ async def craftsman_dashboard(request: Request):
     return templates.TemplateResponse(
         "pages/craftsman/dashboard.html",
         {"request": request}
+    )
+
+
+@router.get("/admin/categories", response_class=HTMLResponse)
+async def admin_categories(request: Request):
+    return templates.TemplateResponse(
+        "pages/admin/categories.html",
+        {"request": request}
+    )
+
+
+@router.get("/admin/categories/new", response_class=HTMLResponse)
+async def admin_new_category(request: Request):
+    return templates.TemplateResponse(
+        "pages/admin/new-category.html",
+        {"request": request}
+    )
+
+
+@router.get("/admin/categories/{category_id}", response_class=HTMLResponse)
+async def admin_category_detail(request: Request, category_id: str, mode: str = "view"):
+    print(f"Category ID in route: {category_id}")  # Debug print
+    return templates.TemplateResponse(
+        "pages/admin/category.html",
+        {"request": request, "category_id": category_id, "mode": mode}
     )
