@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 # Import from config module
-from app.config import templates
 from app.database import init_db
 from app.middleware.auth_middleware import auth_middleware
 
@@ -12,6 +11,7 @@ from app.middleware.auth_middleware import auth_middleware
 from app.routes.web import router as web_router
 from app.routes.api.auth_api import router as auth_api_router
 from app.routes.api.category_api import router as category_api_router
+from app.routes.api.craftsman_api import router as craftsman_api_router
 
 # Define lifespan context manager
 
@@ -39,6 +39,7 @@ app.middleware("http")(auth_middleware)
 app.include_router(web_router)
 app.include_router(auth_api_router)
 app.include_router(category_api_router)
+app.include_router(craftsman_api_router)
 
 if __name__ == "__main__":
     import uvicorn

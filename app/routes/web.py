@@ -36,6 +36,8 @@ async def address_page(request: Request, userid: str, role: str):
         {"request": request, "userid": userid, "role": role}
     )
 
+# ADMIN PAGES
+
 
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
@@ -46,14 +48,6 @@ async def admin_dashboard(request: Request):
             "request": request,
             "current_date": datetime.now().strftime("%A, %d %B %Y")
         }
-    )
-
-
-@router.get("/craftsman", response_class=HTMLResponse)
-async def craftsman_dashboard(request: Request):
-    return templates.TemplateResponse(
-        "pages/craftsman/dashboard.html",
-        {"request": request}
     )
 
 
@@ -79,4 +73,14 @@ async def admin_category_detail(request: Request, category_id: str, mode: str = 
     return templates.TemplateResponse(
         "pages/admin/category.html",
         {"request": request, "category_id": category_id, "mode": mode}
+    )
+
+# CRAFTSMAN PAGES
+
+
+@router.get("/craftsman", response_class=HTMLResponse)
+async def craftsman_dashboard(request: Request):
+    return templates.TemplateResponse(
+        "pages/craftsman/dashboard.html",
+        {"request": request}
     )

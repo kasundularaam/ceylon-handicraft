@@ -1,7 +1,83 @@
 {% extends "base.html" %} {% block title %}Craftsman Dashboard - Ceylon
-Handicrafts{% endblock %} {% block module_imports %} import
-'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
-'/static/js/components/craftsman/craftsman-dashboard.js'; {% endblock %} {%
-block content %}
-<craftsman-dashboard></craftsman-dashboard>
+Handicrafts{% endblock %} {% block module_imports %} // Components import
+'/static/js/components/craftsman/craftsman-navbar.js'; import
+'/static/js/components/craftsman/insight-card.js'; import
+'/static/js/components/craftsman/sales-chart.js'; import
+'/static/js/components/craftsman/review-list.js'; // Utilities import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; {%
+endblock %} {% block content %}
+<div class="dashboard-container">
+  <craftsman-navbar></craftsman-navbar>
+
+  <div class="dashboard-content">
+    <h1 class="dashboard-title">Dashboard</h1>
+
+    <div class="insight-cards-container">
+      <insight-card type="earnings"></insight-card>
+      <insight-card type="orders"></insight-card>
+      <insight-card type="products"></insight-card>
+      <insight-card type="ratings"></insight-card>
+    </div>
+
+    <div class="chart-container">
+      <h2 class="section-title">Sales Last 7 Days</h2>
+      <sales-chart></sales-chart>
+    </div>
+
+    <div class="reviews-container">
+      <h2 class="section-title">Recent Reviews</h2>
+      <review-list></review-list>
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #3e2723; /* Main dark brown color */
+    color: #ffffff; /* Text white */
+    font-family: "Poppins", sans-serif;
+  }
+
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .dashboard-content {
+    flex: 1;
+    padding: 2rem;
+  }
+
+  .dashboard-title {
+    color: #ffd700; /* Accent yellow */
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    color: #e0e0e0; /* Subtle grey */
+    margin: 1.5rem 0 1rem;
+  }
+
+  .insight-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chart-container {
+    background-color: #5d4037; /* Secondary brown */
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .reviews-container {
+    background-color: #5d4037; /* Secondary brown */
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+</style>
 {% endblock %}
