@@ -87,8 +87,25 @@ async def delete_category(category_id: str, db: Session = Depends(get_db)):
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
 
+    # Delete the associated image file if it exists
+    if db_category.image and db_category.image.startswith("/static/images/categories/"):
+        try:
+            # Get the filename from the path
+            filename = db_category.image.split("/")[-1]
+            file_path = UPLOAD_DIR / filename
+
+            # Check if file exists before attempting to delete
+            if file_path.exists():
+                os.remove(file_path)
+                print(f"Deleted image file: {file_path}")
+        except Exception as e:
+            # Log error but continue with category deletion
+            print(f"Error deleting image file: {str(e)}")
+
+    # Delete the category from the database
     db.delete(db_category)
     db.commit()
+
     return {"message": "Category deleted successfully"}
 
 

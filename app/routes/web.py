@@ -75,7 +75,7 @@ async def admin_new_category(request: Request):
 
 @router.get("/admin/categories/{category_id}", response_class=HTMLResponse)
 async def admin_category_detail(request: Request, category_id: str, mode: str = "view"):
-    print(f"Category ID in route: {category_id}")  # Debug print
+    print(f"Category route called - ID: {category_id}, Mode: {mode}")
     return templates.TemplateResponse(
         "pages/admin/category.html",
         {"request": request, "category_id": category_id, "mode": mode}

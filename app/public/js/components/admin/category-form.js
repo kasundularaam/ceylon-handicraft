@@ -64,8 +64,9 @@ class CategoryForm extends LitElement {
     return this;
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
+    console.log("CategoryForm connected with ID:", this.categoryId);
 
     // Get the categoryId from attribute if not set via property
     if (!this.categoryId || this.categoryId === "") {
@@ -75,29 +76,36 @@ class CategoryForm extends LitElement {
         console.log("CategoryForm: Got ID from attribute", this.categoryId);
       }
     }
-  }
 
-  updated(changedProperties) {
-    if (changedProperties.has("category") && this.category) {
-      console.log("CategoryForm: Category updated", this.category);
-      this.formData = {
-        title: this.category.title || "",
-        description: this.category.description || "",
-        icon: this.category.icon || "fas fa-tag",
-        image: this.category.image || "",
-      };
-
-      // Set image preview if category has an image
-      if (this.category.image) {
-        this.imagePreview = this.category.image;
-      }
+    // If we have a categoryId and category is null, fetch the data
+    if (this.categoryId && !this.category) {
+      await this.fetchCategory();
+    }
+    // If we already have category data passed in, use it
+    else if (this.category) {
+      this.updateFormFromCategory();
     }
   }
 
-  async firstUpdated() {
-    console.log("CategoryForm: firstUpdated", this.categoryId);
-    if (this.categoryId && this.categoryId !== "") {
-      await this.fetchCategory();
+  updated(changedProperties) {
+    // If category is set after component is created, update form data
+    if (changedProperties.has("category") && this.category) {
+      this.updateFormFromCategory();
+    }
+  }
+
+  updateFormFromCategory() {
+    console.log("CategoryForm: Updating form from category", this.category);
+    this.formData = {
+      title: this.category.title || "",
+      description: this.category.description || "",
+      icon: this.category.icon || "fas fa-tag",
+      image: this.category.image || "",
+    };
+
+    // Set image preview if category has an image
+    if (this.category.image) {
+      this.imagePreview = this.category.image;
     }
   }
 
@@ -114,17 +122,7 @@ class CategoryForm extends LitElement {
       console.log("CategoryForm: Fetched data", response);
 
       this.category = response;
-      this.formData = {
-        title: this.category.title || "",
-        description: this.category.description || "",
-        icon: this.category.icon || "fas fa-tag",
-        image: this.category.image || "",
-      };
-
-      // Set image preview if category has an image
-      if (this.category.image) {
-        this.imagePreview = this.category.image;
-      }
+      this.updateFormFromCategory();
     } catch (error) {
       console.error("Error fetching category:", error);
       this.error = "Failed to load category. Please try again.";
@@ -313,6 +311,12 @@ class CategoryForm extends LitElement {
   }
 
   render() {
+    console.log("CategoryForm render", {
+      loading: this.loading,
+      category: this.category,
+      formData: this.formData,
+    });
+
     if (this.loading) {
       return html`
         <div class="loading-container">
@@ -346,22 +350,26 @@ class CategoryForm extends LitElement {
     return html`
       <div class="category-form-container">
         <form @submit=${this.handleSubmit} class="category-form">
-          ${this.error
-            ? html`
-                <div class="form-error">
-                  <i class="fas fa-exclamation-triangle"></i>
-                  ${this.error}
-                </div>
-              `
-            : ""}
-          ${this.success
-            ? html`
-                <div class="form-success">
-                  <i class="fas fa-check-circle"></i>
-                  ${this.success}
-                </div>
-              `
-            : ""}
+          ${
+            this.error
+              ? html`
+                  <div class="form-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${this.error}
+                  </div>
+                `
+              : ""
+          }
+          ${
+            this.success
+              ? html`
+                  <div class="form-success">
+                    <i class="fas fa-check-circle"></i>
+                    ${this.success}
+                  </div>
+                `
+              : ""
+          }
 
           <div class="form-group">
             <label for="title">Title</label>
@@ -374,11 +382,13 @@ class CategoryForm extends LitElement {
               class="${this.formErrors.title ? "input-error" : ""}"
               placeholder="Enter category title"
             />
-            ${this.formErrors.title
-              ? html`
-                  <div class="error-message">${this.formErrors.title}</div>
-                `
-              : ""}
+            ${
+              this.formErrors.title
+                ? html`
+                    <div class="error-message">${this.formErrors.title}</div>
+                  `
+                : ""
+            }
           </div>
 
           <div class="form-group">
@@ -429,14 +439,16 @@ class CategoryForm extends LitElement {
                   placeholder="Enter FontAwesome icon class"
                   class="${this.formErrors.icon ? "input-error" : ""}"
                 />
-                ${this.formErrors.icon
-                  ? html`
-                      <div class="error-message">${this.formErrors.icon}</div>
-                    `
-                  : ""}
+                ${
+                  this.formErrors.icon
+                    ? html`
+                        <div class="error-message">${this.formErrors.icon}</div>
+                      `
+                    : ""
+                }
                 <div class="icon-hint">
                   Visit
-                  <a
+                  
                     href="https://fontawesome.com/icons"
                     target="_blank"
                     rel="noopener"
@@ -458,41 +470,47 @@ class CategoryForm extends LitElement {
                   name="imageFile"
                   accept="image/*"
                   @change=${this.handleImageChange}
-                  class="image-input ${this.formErrors.image
-                    ? "input-error"
-                    : ""}"
+                  class="image-input ${
+                    this.formErrors.image ? "input-error" : ""
+                  }"
                   ?disabled=${this.uploadingImage}
                 />
                 <label
                   for="image"
-                  class="image-upload-label ${this.uploadingImage
-                    ? "uploading"
-                    : ""}"
+                  class="image-upload-label ${
+                    this.uploadingImage ? "uploading" : ""
+                  }"
                 >
-                  ${this.uploadingImage
-                    ? html`<i class="fas fa-circle-notch fa-spin"></i
-                        ><span>Uploading...</span>`
-                    : html`<i class="fas fa-cloud-upload-alt"></i
-                        ><span>Choose image file</span>`}
+                  ${
+                    this.uploadingImage
+                      ? html`<i class="fas fa-circle-notch fa-spin"></i
+                          ><span>Uploading...</span>`
+                      : html`<i class="fas fa-cloud-upload-alt"></i
+                          ><span>Choose image file</span>`
+                  }
                 </label>
               </div>
 
-              ${this.imagePreview
-                ? html`
-                    <div class="image-preview">
-                      <img
-                        src="${this.imagePreview}"
-                        alt="Category image preview"
-                      />
-                    </div>
-                  `
-                : ""}
+              ${
+                this.imagePreview
+                  ? html`
+                      <div class="image-preview">
+                        <img
+                          src="${this.imagePreview}"
+                          alt="Category image preview"
+                        />
+                      </div>
+                    `
+                  : ""
+              }
             </div>
-            ${this.formErrors.image
-              ? html`
-                  <div class="error-message">${this.formErrors.image}</div>
-                `
-              : ""}
+            ${
+              this.formErrors.image
+                ? html`
+                    <div class="error-message">${this.formErrors.image}</div>
+                  `
+                : ""
+            }
             <div class="form-hint">
               Uploaded images will be stored in the server's categories
               directory.
@@ -512,11 +530,15 @@ class CategoryForm extends LitElement {
               class="submit-button"
               ?disabled=${this.saving || this.uploadingImage}
             >
-              ${this.saving
-                ? html` <i class="fas fa-circle-notch fa-spin"></i> Saving... `
-                : this.categoryId
-                ? "Update Category"
-                : "Create Category"}
+              ${
+                this.saving
+                  ? html`
+                      <i class="fas fa-circle-notch fa-spin"></i> Saving...
+                    `
+                  : this.categoryId
+                  ? "Update Category"
+                  : "Create Category"
+              }
             </button>
           </div>
         </form>

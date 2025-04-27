@@ -1,22 +1,21 @@
-{% extends "base.html" %} {% block title %}Category Details - Ceylon Handicrafts
-Admin{% endblock %} {% block module_imports %} import
-'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
+{% extends "base.html" %} {% block title %}Category - Ceylon Handicrafts Admin{%
+endblock %} {% block module_imports %} import '/static/js/utils/auth_utils.js';
+import '/static/js/utils/api_utils.js'; import
 '/static/js/components/admin/admin-navbar.js'; import
-'/static/js/components/admin/category-detail.js'; {% endblock %} {% block
-content %}
+'/static/js/components/admin/category-detail.js'; import
+'/static/js/components/admin/category-form.js'; {% endblock %} {% block content
+%}
 <div class="admin-page">
   <admin-navbar></admin-navbar>
 
   <div class="admin-content">
-    <div class="page-header">
-      <h1>Category Details</h1>
-      <div class="header-actions">
-        <a href="/admin/categories" class="back-button">
-          <i class="fas fa-arrow-left"></i> Back to Categories
-        </a>
-      </div>
+    <!-- Debug info - you can remove this in production -->
+    <div class="debug-info">
+      <p>Category ID: {{ category_id }}</p>
+      <p>Mode: {{ mode }}</p>
     </div>
 
+    <!-- The actual component -->
     <category-detail
       category-id="{{ category_id }}"
       mode="{{ mode }}"
@@ -25,61 +24,36 @@ content %}
 </div>
 
 <style>
-  /* Reset margins and padding */
   body,
   html {
     margin: 0;
     padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden;
     background-color: #3e2723;
+    color: white;
+    font-family: "Roboto", sans-serif;
   }
 
   .admin-page {
     min-height: 100vh;
-    background-color: #3e2723;
-    color: #ffffff;
   }
 
   .admin-content {
-    padding: 1.5rem;
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
   }
 
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .back-button {
-    background-color: transparent;
-    color: #ffffff;
-    border: 1px solid #ffffff;
+  .debug-info {
+    background-color: #333;
+    padding: 10px 15px;
     border-radius: 4px;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    margin-bottom: 20px;
+    font-family: monospace;
+    font-size: 14px;
   }
 
-  .back-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  .debug-info p {
+    margin: 5px 0;
   }
 </style>
 {% endblock %}
