@@ -9,6 +9,8 @@ from app.middleware.auth_middleware import auth_middleware
 
 # Import routers - these should come after the config import
 from app.routes.web import router as web_router
+from app.routes.ws import router as ws_router
+from app.routes.api.landing_api import router as landing_api_router
 from app.routes.api.auth_api import router as auth_api_router
 from app.routes.api.category_api import router as category_api_router
 from app.routes.api.product_api import router as product_api_router
@@ -38,6 +40,8 @@ app.middleware("http")(auth_middleware)
 
 # Include routers
 app.include_router(web_router)
+app.include_router(ws_router)
+app.include_router(landing_api_router)
 app.include_router(auth_api_router)
 app.include_router(category_api_router)
 app.include_router(product_api_router)
