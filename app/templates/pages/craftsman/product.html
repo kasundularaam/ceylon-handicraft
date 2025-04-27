@@ -1,0 +1,96 @@
+{% extends "base.html" %} {% block title %}Product Details - Ceylon
+Handicrafts{% endblock %} {% block module_imports %} import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
+'/static/js/utils/websocket_utils.js'; import
+'/static/js/components/craftsman/craftsman-navbar.js'; import
+'/static/js/components/craftsman/craftsman-product-detail.js'; {% endblock %} {%
+block content %}
+<div class="craftsman-dashboard">
+  <craftsman-navbar></craftsman-navbar>
+
+  <div class="dashboard-content">
+    <div class="dashboard-header">
+      <a href="/craftsman/products" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Products
+      </a>
+      <div class="action-buttons">
+        <a
+          href="/craftsman/product?mode=edit&id={{ product_id }}"
+          class="edit-btn"
+        >
+          <i class="fas fa-edit"></i> Edit
+        </a>
+      </div>
+    </div>
+
+    <craftsman-product-detail
+      product-id="{{ product_id }}"
+    ></craftsman-product-detail>
+  </div>
+</div>
+
+<style>
+  /* Reset margins and padding */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+  }
+
+  .craftsman-dashboard {
+    min-height: 100vh;
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .dashboard-content {
+    padding: 1.5rem;
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .back-btn {
+    color: #e0e0e0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+  }
+
+  .back-btn:hover {
+    color: #ffd700;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .edit-btn {
+    background-color: #ffd700;
+    color: #3e2723;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .edit-btn:hover {
+    background-color: #e5c100;
+  }
+</style>
+{% endblock %}

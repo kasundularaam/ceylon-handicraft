@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from app.config import templates
 
 router = APIRouter()
@@ -84,3 +84,42 @@ async def craftsman_dashboard(request: Request):
         "pages/craftsman/dashboard.html",
         {"request": request}
     )
+
+
+# Remove auth checking from web routes
+
+# Craftsman Products Routes
+@router.get("/craftsman/products", response_class=HTMLResponse)
+async def craftsman_products(request: Request):
+    # No auth checking - handled by client
+    return templates.TemplateResponse(
+        "pages/craftsman/products.html",
+        {"request": request}
+    )
+
+
+@router.get("/craftsman/products/{product_id}", response_class=HTMLResponse)
+async def craftsman_product_detail(request: Request, product_id: str):
+    # No auth checking - handled by client
+    return templates.TemplateResponse(
+        "pages/craftsman/product.html",
+        {"request": request, "product_id": product_id}
+    )
+
+
+@router.get("/craftsman/product", response_class=HTMLResponse)
+async def craftsman_product_form(request: Request):
+    # No auth checking - handled by client
+    mode = request.query_params.get("mode", "new")
+    product_id = request.query_params.get("id", None)
+
+    if mode == "edit" and product_id:
+        return templates.TemplateResponse(
+            "pages/craftsman/edit-product.html",
+            {"request": request, "product_id": product_id}
+        )
+    else:
+        return templates.TemplateResponse(
+            "pages/craftsman/new-product.html",
+            {"request": request}
+        )

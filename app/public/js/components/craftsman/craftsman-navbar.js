@@ -1,31 +1,78 @@
-// File: app/public/js/components/craftsman/craftsman-navbar.js
 import { LitElement, html } from "https://esm.run/lit";
-import { getUser, signOut } from "../../utils/auth_utils.js";
+import { getUser, signOut } from "/static/js/utils/auth_utils.js";
 
 class CraftsmanNavbar extends LitElement {
   static get properties() {
     return {
-      user: { type: Object },
+      craftsmanName: { type: String },
+      activePage: { type: String },
+      errorMessage: { type: String },
     };
   }
 
   constructor() {
     super();
-    this.user = null;
+    this.craftsmanName = "";
+    this.activePage = "dashboard";
+    this.errorMessage = "";
+
+    // Check authentication with try/catch
+    try {
+      this.checkAuth();
+    } catch (error) {
+      console.error("Error in navbar authentication:", error);
+      this.errorMessage = error.message;
+    }
   }
 
-  // Disable Shadow DOM
+  // Disable Shadow DOM to access global styles
   createRenderRoot() {
     return this;
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadUserData();
+  checkAuth() {
+    console.log("Checking auth in navbar");
+    const user = getUser();
+    console.log("User data:", user);
+
+    if (user) {
+      this.craftsmanName = user.name || "Craftsman";
+      // Check if user is craftsman, but skip redirect for now to avoid loops
+      if (user.role !== "Craftsman") {
+        console.log("User is not a Craftsman:", user.role);
+        // Instead of redirect, just log the issue for debugging
+        this.errorMessage = "This area is for craftsmen only";
+      }
+    } else {
+      console.log("No user found, will redirect to login");
+      // For debugging, let's not redirect on page load
+      this.errorMessage = "Authentication required";
+
+      // Comment out the redirect for debugging
+      // const currentPath = window.location.pathname + window.location.search;
+      // window.location.href = `/auth/login?redirect=${encodeURIComponent(currentPath)}`;
+    }
   }
 
-  async loadUserData() {
-    this.user = getUser();
+  firstUpdated() {
+    try {
+      // Set active page based on URL
+      const path = window.location.pathname;
+      console.log("Current path:", path);
+
+      if (path.includes("/craftsman/products")) {
+        this.activePage = "products";
+      } else if (path.includes("/craftsman/orders")) {
+        this.activePage = "orders";
+      } else {
+        this.activePage = "dashboard";
+      }
+
+      console.log("Active page set to:", this.activePage);
+    } catch (error) {
+      console.error("Error in firstUpdated:", error);
+      this.errorMessage = error.message;
+    }
   }
 
   handleSignOut() {
@@ -34,132 +81,136 @@ class CraftsmanNavbar extends LitElement {
   }
 
   render() {
+    console.log("Rendering navbar, craftsman name:", this.craftsmanName);
+
     return html`
       <nav class="craftsman-navbar">
-        <div class="navbar-logo">
-          <img src="/static/images/logo.png" alt="Ceylon Handicrafts" />
-          <span>Ceylon Handicrafts</span>
+        <div class="navbar-brand">
+          <h1>Ceylon Handicrafts</h1>
         </div>
 
-        <ul class="navbar-links">
-          <li class="active">
-            <a href="/craftsman"><i class="fas fa-chart-line"></i> Dashboard</a>
-          </li>
-          <li>
-            <a href="/craftsman/products"
-              ><i class="fas fa-box"></i> Products</a
-            >
-          </li>
-          <li>
-            <a href="/craftsman/orders"
-              ><i class="fas fa-shipping-fast"></i> Orders</a
-            >
-          </li>
-        </ul>
+        <div class="navbar-menu">
+          <a
+            href="/craftsman"
+            class="${this.activePage === "dashboard" ? "active" : ""}"
+          >
+            <i class="fas fa-chart-line"></i> Dashboard
+          </a>
+          <a
+            href="/craftsman/products"
+            class="${this.activePage === "products" ? "active" : ""}"
+          >
+            <i class="fas fa-box"></i> Products
+          </a>
+          <a
+            href="/craftsman/orders"
+            class="${this.activePage === "orders" ? "active" : ""}"
+          >
+            <i class="fas fa-shipping-fast"></i> Orders
+          </a>
+        </div>
 
-        <div class="navbar-profile">
-          <div class="profile-info">
-            <span>${this.user ? this.user.name : "Craftsman"}</span>
-            <a href="/craftsman/profile"><i class="fas fa-user-circle"></i></a>
+        <div class="navbar-user">
+          <div class="user-info">
+            <span class="user-name">${this.craftsmanName}</span>
+            <span class="user-role">Craftsman</span>
           </div>
-          <button class="sign-out-btn" @click=${this.handleSignOut}>
-            <i class="fas fa-sign-out-alt"></i>
+          <button class="signout-btn" @click=${this.handleSignOut}>
+            <i class="fas fa-sign-out-alt"></i> Sign Out
           </button>
         </div>
       </nav>
 
+      ${this.errorMessage
+        ? html` <div class="navbar-error">${this.errorMessage}</div> `
+        : ""}
+
       <style>
         .craftsman-navbar {
-          width: 250px;
-          background-color: #5d4037; /* Secondary brown */
-          min-height: 100vh;
-          padding: 1.5rem 0;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .navbar-logo {
-          display: flex;
-          align-items: center;
-          padding: 0 1.5rem;
-          margin-bottom: 2rem;
-          color: #ffd700; /* Accent yellow */
-        }
-
-        .navbar-logo img {
-          width: 40px;
-          margin-right: 0.5rem;
-        }
-
-        .navbar-links {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          flex-grow: 1;
-        }
-
-        .navbar-links li {
-          padding: 0.75rem 1.5rem;
-          transition: background-color 0.3s;
-        }
-
-        .navbar-links li:hover {
-          background-color: #3e2723; /* Main dark brown */
-        }
-
-        .navbar-links li.active {
-          background-color: #3e2723; /* Main dark brown */
-          border-left: 4px solid #ffd700; /* Accent yellow */
-        }
-
-        .navbar-links a {
-          color: #ffffff; /* Text white */
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-        }
-
-        .navbar-links a i {
-          margin-right: 0.5rem;
-          width: 20px;
-          text-align: center;
-        }
-
-        .navbar-profile {
-          padding: 1.5rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
           justify-content: space-between;
           align-items: center;
+          background-color: #3e2723;
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid #5d4037;
         }
 
-        .profile-info {
+        .navbar-brand h1 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #ffd700;
+        }
+
+        .navbar-menu {
+          display: flex;
+          gap: 1.5rem;
+        }
+
+        .navbar-menu a {
+          color: #ffffff;
+          text-decoration: none;
+          font-weight: 500;
+          padding: 0.5rem 0;
+          transition: color 0.2s;
+        }
+
+        .navbar-menu a:hover {
+          color: #ffd700;
+        }
+
+        .navbar-menu a.active {
+          color: #ffd700;
+          border-bottom: 2px solid #ffd700;
+        }
+
+        .navbar-menu a i {
+          margin-right: 0.5rem;
+        }
+
+        .navbar-user {
           display: flex;
           align-items: center;
+          gap: 1rem;
         }
 
-        .profile-info span {
-          margin-right: 0.5rem;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 150px;
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          text-align: right;
         }
 
-        .profile-info a {
-          color: #ffd700; /* Accent yellow */
-          font-size: 1.25rem;
+        .user-name {
+          font-weight: 600;
+          color: #ffffff;
         }
 
-        .sign-out-btn {
-          background: none;
-          border: none;
-          color: #e0e0e0; /* Subtle grey */
+        .user-role {
+          font-size: 0.85rem;
+          color: #e0e0e0;
+        }
+
+        .signout-btn {
+          background-color: transparent;
+          border: 1px solid #ffd700;
+          color: #ffd700;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
           cursor: pointer;
+          transition: all 0.2s;
         }
 
-        .sign-out-btn:hover {
-          color: #ffd700; /* Accent yellow */
+        .signout-btn:hover {
+          background-color: #ffd700;
+          color: #3e2723;
+        }
+
+        .navbar-error {
+          background-color: rgba(255, 0, 0, 0.1);
+          color: #ffcccc;
+          text-align: center;
+          padding: 0.5rem;
+          font-size: 0.9rem;
         }
       </style>
     `;

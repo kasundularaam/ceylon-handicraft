@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block title %}My Products - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import '/static/js/utils/auth_utils.js';
+import '/static/js/utils/api_utils.js'; import
+'/static/js/components/craftsman/craftsman-navbar.js'; import
+'/static/js/components/craftsman/craftsman-product-list.js'; import
+'/static/js/components/craftsman/craftsman-product-card.js'; {% endblock %} {%
+block content %}
+<div class="craftsman-dashboard">
+  <craftsman-navbar></craftsman-navbar>
+
+  <div class="dashboard-content">
+    <div class="dashboard-header">
+      <h1>My Products</h1>
+      <a href="/craftsman/product?mode=new" class="add-product-btn">
+        <i class="fas fa-plus"></i> Add New Product
+      </a>
+    </div>
+
+    <craftsman-product-list></craftsman-product-list>
+  </div>
+</div>
+
+<style>
+  /* Reset margins and padding */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+  }
+
+  .craftsman-dashboard {
+    min-height: 100vh;
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .dashboard-content {
+    padding: 1.5rem;
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .add-product-btn {
+    background-color: var(--accent-yellow, #ffd700);
+    color: var(--dark-brown, #3e2723);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .add-product-btn:hover {
+    background-color: #e5c100;
+  }
+</style>
+{% endblock %}
