@@ -1,18 +1,280 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
-from typing import List, Optional
+from sqlalchemy import desc, asc, func
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, ConfigDict
 import os
 import shutil
 import uuid
 import json
+import math
 from datetime import datetime
 
 from ...database import get_db
 from ...models import Product, Category, ProductType, Bid
 
+# Response schemas for listing endpoints
+
+
+class CategoryResponse(BaseModel):
+    id: str
+    title: str
+    icon: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductResponse(BaseModel):
+    id: str
+    title: str
+    base_price: float
+    type: str
+    category_id: str
+    image_paths: Optional[List[str]] = None
+    current_bid: Optional[float] = None
+    category: Optional[CategoryResponse] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductListResponse(BaseModel):
+    products: List[ProductResponse]
+    currentPage: int
+    totalPages: int
+    totalProducts: int
+
+
+class FilterOptionsResponse(BaseModel):
+    categories: List[Dict[str, Any]]
+    priceRanges: List[Dict[str, Any]]
+
+
 router = APIRouter(prefix="/api/products")
+
+# Get sale products with pagination, filtering and sorting
+
+
+@router.get("/sale", response_model=ProductListResponse)
+async def get_sale_products(
+    request: Request,
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    limit: int = Query(12, ge=1, le=100),
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    sort: str = "newest",
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None
+):
+    """
+    Get products for sale with pagination, filtering and sorting.
+    """
+    query = db.query(Product).filter(Product.type == ProductType.SALE)
+
+    # Apply filters
+    if category:
+        query = query.filter(Product.category_id == category)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Product.title.ilike(search_term) |
+                             Product.description.ilike(search_term))
+
+    if min_price is not None:
+        query = query.filter(Product.base_price >= min_price)
+
+    if max_price is not None:
+        query = query.filter(Product.base_price <= max_price)
+
+    # Apply sorting
+    if sort == "newest":
+        query = query.order_by(desc(Product.created_at))
+    elif sort == "price_low":
+        query = query.order_by(asc(Product.base_price))
+    elif sort == "price_high":
+        query = query.order_by(desc(Product.base_price))
+    elif sort == "popular":
+        # Default to newest for now
+        query = query.order_by(desc(Product.created_at))
+
+    # Count total products
+    total_products = query.count()
+    total_pages = math.ceil(total_products / limit)
+
+    # Pagination
+    offset = (page - 1) * limit
+    products = query.offset(offset).limit(limit).all()
+
+    # Prepare response
+    result = []
+    for product in products:
+        # Get product category
+        category = product.category
+        category_data = CategoryResponse.from_orm(
+            category) if category else None
+
+        # Get images from directory
+        image_dir = f"/static/images/products/{product.id}"
+        server_dir = f"app/public/images/products/{product.id}"
+
+        images = []
+        if os.path.exists(server_dir):
+            for file in os.listdir(server_dir):
+                if os.path.isfile(os.path.join(server_dir, file)):
+                    images.append(f"{image_dir}/{file}")
+
+        # Create product data
+        product_data = ProductResponse(
+            id=product.id,
+            title=product.title,
+            base_price=product.base_price,
+            type=product.type.value,
+            category_id=product.category_id,
+            image_paths=images,
+            category=category_data
+        )
+        result.append(product_data)
+
+    return {
+        "products": result,
+        "currentPage": page,
+        "totalPages": max(1, total_pages),
+        "totalProducts": total_products
+    }
+
+# Get auction products with pagination, filtering and sorting
+
+
+@router.get("/auction", response_model=ProductListResponse)
+async def get_auction_products(
+    request: Request,
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    limit: int = Query(12, ge=1, le=100),
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    sort: str = "newest",
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None
+):
+    """
+    Get auction products with pagination, filtering and sorting.
+    """
+    query = db.query(Product).filter(Product.type == ProductType.AUCTION)
+
+    # Apply filters
+    if category:
+        query = query.filter(Product.category_id == category)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Product.title.ilike(search_term) |
+                             Product.description.ilike(search_term))
+
+    if min_price is not None:
+        query = query.filter(Product.base_price >= min_price)
+
+    if max_price is not None:
+        query = query.filter(Product.base_price <= max_price)
+
+    # Apply sorting
+    if sort == "newest":
+        query = query.order_by(desc(Product.created_at))
+    elif sort == "price_low":
+        query = query.order_by(asc(Product.base_price))
+    elif sort == "price_high":
+        query = query.order_by(desc(Product.base_price))
+    elif sort == "popular":
+        # Default to newest for now
+        query = query.order_by(desc(Product.created_at))
+
+    # Count total products
+    total_products = query.count()
+    total_pages = math.ceil(total_products / limit)
+
+    # Pagination
+    offset = (page - 1) * limit
+    products = query.offset(offset).limit(limit).all()
+
+    # Prepare response
+    result = []
+    for product in products:
+        # Get highest bid
+        highest_bid = db.query(Bid).filter(
+            Bid.product_id == product.id
+        ).order_by(desc(Bid.bid_price)).first()
+
+        # Get product category
+        category = product.category
+        category_data = CategoryResponse.from_orm(
+            category) if category else None
+
+        # Get images from directory
+        image_dir = f"/static/images/products/{product.id}"
+        server_dir = f"app/public/images/products/{product.id}"
+
+        images = []
+        if os.path.exists(server_dir):
+            for file in os.listdir(server_dir):
+                if os.path.isfile(os.path.join(server_dir, file)):
+                    images.append(f"{image_dir}/{file}")
+
+        # Create product data
+        product_data = ProductResponse(
+            id=product.id,
+            title=product.title,
+            base_price=product.base_price,
+            type=product.type.value,
+            category_id=product.category_id,
+            image_paths=images,
+            current_bid=highest_bid.bid_price if highest_bid else product.base_price,
+            category=category_data
+        )
+        result.append(product_data)
+
+    return {
+        "products": result,
+        "currentPage": page,
+        "totalPages": max(1, total_pages),
+        "totalProducts": total_products
+    }
+
+# Get filter options
+
+
+@router.get("/filters", response_model=FilterOptionsResponse)
+async def get_filter_options(
+    request: Request,
+    db: Session = Depends(get_db),
+    type: Optional[str] = None
+):
+    """
+    Get available filter options for products.
+    """
+    # Get categories
+    categories = db.query(Category).all()
+    category_data = []
+
+    for category in categories:
+        category_data.append({
+            "id": category.id,
+            "title": category.title,
+            "icon": category.icon or "fa fa-tag"
+        })
+
+    # Define price ranges
+    price_ranges = [
+        {"id": "under50", "title": "Under $50", "min": 0, "max": 50},
+        {"id": "50to100", "title": "$50 - $100", "min": 50, "max": 100},
+        {"id": "100to250", "title": "$100 - $250", "min": 100, "max": 250},
+        {"id": "250plus", "title": "Over $250", "min": 250, "max": None}
+    ]
+
+    return {
+        "categories": category_data,
+        "priceRanges": price_ranges
+    }
 
 # Get all products for the current craftsman
 
@@ -356,7 +618,6 @@ async def get_categories(
     db: Session = Depends(get_db)
 ):
     try:
-
         # Get all categories
         categories = db.query(Category).all()
 

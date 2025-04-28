@@ -1,0 +1,168 @@
+{% extends "base.html" %} {% block title %}Ceylon Handicrafts - Auction
+Marketplace{% endblock %} {% block module_imports %} import
+'/static/js/components/landing/landing-navbar.js'; import
+'/static/js/components/product/product-listing.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="auction-page">
+  <landing-navbar></landing-navbar>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Auction Marketplace</h1>
+      <p>
+        Bid on unique Sri Lankan handicrafts directly from artisans and add
+        exclusive pieces to your collection.
+      </p>
+    </div>
+  </div>
+
+  <div class="auction-info-banner">
+    <div class="container">
+      <div class="info-item">
+        <i class="fas fa-gavel"></i>
+        <div class="info-content">
+          <h3>How Auctions Work</h3>
+          <p>
+            Place bids on items you love. The highest bidder at the end of the
+            auction period wins.
+          </p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <i class="fas fa-hand-holding-usd"></i>
+        <div class="info-content">
+          <h3>Fair Pricing</h3>
+          <p>
+            All auctions start at the artisan's base price. No hidden fees or
+            commissions.
+          </p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <i class="fas fa-shipping-fast"></i>
+        <div class="info-content">
+          <h3>Direct Shipping</h3>
+          <p>
+            Winners receive their items directly from the artisan with tracking
+            information.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <product-listing type="auction"></product-listing>
+  </div>
+</div>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .auction-page {
+    min-height: 100vh;
+    width: 100%;
+    display: block;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .page-header {
+    background: linear-gradient(rgba(62, 39, 35, 0.8), rgba(62, 39, 35, 0.9)),
+      url("/static/images/auction-header.jpg");
+    background-size: cover;
+    background-position: center;
+    padding: 60px 0;
+    margin-bottom: 0;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 15px 0;
+    color: #ffd700;
+  }
+
+  .page-header p {
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 0;
+    color: #e0e0e0;
+  }
+
+  .auction-info-banner {
+    background-color: rgba(93, 64, 55, 0.7);
+    padding: 30px 0;
+    margin-bottom: 40px;
+  }
+
+  .auction-info-banner .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .info-item {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: rgba(62, 39, 35, 0.5);
+  }
+
+  .info-item i {
+    font-size: 2rem;
+    color: #ffd700;
+  }
+
+  .info-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #ffffff;
+  }
+
+  .info-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 40px 0;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+    }
+
+    .auction-info-banner .container {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %}

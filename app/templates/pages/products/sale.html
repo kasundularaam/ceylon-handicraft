@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block title %}Ceylon Handicrafts - Shop Handcrafted
+Products{% endblock %} {% block module_imports %} import
+'/static/js/components/landing/landing-navbar.js'; import
+'/static/js/components/product/product-listing.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="sale-page">
+  <landing-navbar></landing-navbar>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Handcrafted Products</h1>
+      <p>
+        Browse our collection of authentic Sri Lankan artisanal products crafted
+        by skilled artisans.
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <product-listing type="sale"></product-listing>
+  </div>
+</div>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .sale-page {
+    min-height: 100vh;
+    width: 100%;
+    display: block;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .page-header {
+    background: linear-gradient(rgba(62, 39, 35, 0.8), rgba(62, 39, 35, 0.9)),
+      url("/static/images/header-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    padding: 60px 0;
+    margin-bottom: 40px;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 15px 0;
+    color: #ffd700;
+  }
+
+  .page-header p {
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 0;
+    color: #e0e0e0;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 40px 0;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+    }
+  }
+</style>
+{% endblock %}

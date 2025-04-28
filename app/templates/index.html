@@ -2,11 +2,22 @@
 Lankan Artisanal Products{% endblock %} {% block module_imports %} import
 '/static/js/components/landing/landing-navbar.js'; import
 '/static/js/components/landing/landing-carousal.js'; import
+'/static/js/components/landing/featured-products-section.js'; import
 '/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
 endblock %} {% block content %}
 <div class="landing-page">
   <landing-navbar></landing-navbar>
   <landing-carousal></landing-carousal>
+
+  <!-- Featured Sale Products Section -->
+  <div class="content-container">
+    <featured-products-section title="Featured Products For Sale" type="sale">
+    </featured-products-section>
+
+    <!-- Featured Auction Products Section -->
+    <featured-products-section title="Featured Auction Items" type="auction">
+    </featured-products-section>
+  </div>
 </div>
 
 <style>
@@ -26,6 +37,12 @@ endblock %} {% block content %}
     min-height: 100vh;
     width: 100%;
     display: block;
+  }
+
+  .content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
 </style>
 {% endblock %}

@@ -123,3 +123,35 @@ async def craftsman_product_form(request: Request):
             "pages/craftsman/new-product.html",
             {"request": request}
         )
+
+
+@router.get("/sale", response_class=HTMLResponse)
+async def sale_products(request: Request):
+    return templates.TemplateResponse(
+        "pages/products/sale.html",
+        {"request": request}
+    )
+
+
+@router.get("/auction", response_class=HTMLResponse)
+async def auction_products(request: Request):
+    return templates.TemplateResponse(
+        "pages/products/auction.html",
+        {"request": request}
+    )
+
+
+@router.get("/sale/{product_id}", response_class=HTMLResponse)
+async def sale_product_detail(request: Request, product_id: str):
+    return templates.TemplateResponse(
+        "pages/products/product_detail.html",
+        {"request": request, "product_id": product_id, "product_type": "sale"}
+    )
+
+
+@router.get("/auction/{product_id}", response_class=HTMLResponse)
+async def auction_product_detail(request: Request, product_id: str):
+    return templates.TemplateResponse(
+        "pages/products/product_detail.html",
+        {"request": request, "product_id": product_id, "product_type": "auction"}
+    )
