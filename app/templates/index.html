@@ -1,148 +1,31 @@
 {% extends "base.html" %} {% block title %}Ceylon Handicrafts - Authentic Sri
-Lankan Artisan Creations{% endblock %} {% block module_imports %} // Components
-import '/static/js/components/landing/app-navbar.js'; import
-'/static/js/components/landing/hero-carousel.js'; import
-'/static/js/components/landing/featured-products.js'; import
-'/static/js/components/landing/vishva-intro.js'; import
-'/static/js/components/landing/category-showcase.js'; import
-'/static/js/components/landing/auction-showcase.js'; import
-'/static/js/components/landing/app-footer.js'; // Utilities import
+Lankan Artisanal Products{% endblock %} {% block module_imports %} import
+'/static/js/components/landing/landing-navbar.js'; import
+'/static/js/components/landing/landing-carousal.js'; import
 '/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
 endblock %} {% block content %}
-<div class="ceylon-app">
-  <!-- Navigation Bar -->
-  <app-navbar></app-navbar>
-
-  <!-- Hero Carousel -->
-  <hero-carousel></hero-carousel>
-
-  <!-- Featured Products Section -->
-  <featured-products></featured-products>
-
-  <!-- Vishva AI Introduction -->
-  <vishva-intro></vishva-intro>
-
-  <!-- Product Categories -->
-  <category-showcase></category-showcase>
-
-  <!-- Featured Auctions -->
-  <auction-showcase></auction-showcase>
-
-  <!-- Footer -->
-  <app-footer></app-footer>
+<div class="landing-page">
+  <landing-navbar></landing-navbar>
+  <landing-carousal></landing-carousal>
 </div>
 
 <style>
-  /* Global styles for the app */
-  :root {
-    --primary-dark-brown: #3e2723;
-    --secondary-brown: #5d4037;
-    --accent-yellow: #ffd700;
-    --text-white: #ffffff;
-    --subtle-grey: #e0e0e0;
-  }
-
-  * {
-    box-sizing: border-box;
+  body,
+  html {
     margin: 0;
     padding: 0;
-  }
-
-  body {
-    font-family: "Poppins", sans-serif;
-    background-color: var(--primary-dark-brown);
-    color: var(--text-white);
-    line-height: 1.6;
-  }
-
-  main {
-    min-height: 100vh;
-  }
-
-  .ceylon-app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  .container {
+    height: 100%;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    overflow-x: hidden;
+    background-color: #3e2723;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
   }
 
-  .section-title {
-    font-size: 2rem;
-    color: var(--text-white);
-    margin-bottom: 2rem;
-    text-align: center;
-    position: relative;
-  }
-
-  .section-title::after {
-    content: "";
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background-color: var(--accent-yellow);
-  }
-
-  .accent-text {
-    color: var(--accent-yellow);
-  }
-
-  .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--accent-yellow);
-    color: var(--primary-dark-brown);
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .btn:hover {
-    background-color: #e6c200;
-    transform: translateY(-2px);
-  }
-
-  .section {
-    padding: 4rem 0;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.8s ease-in-out;
-  }
-
-  .slide-up {
-    animation: slideUp 0.8s ease-in-out;
+  .landing-page {
+    min-height: 100vh;
+    width: 100%;
+    display: block;
   }
 </style>
 {% endblock %}
