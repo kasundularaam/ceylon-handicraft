@@ -1,0 +1,52 @@
+<!-- app/templates/pages/global/about.html -->
+{% extends "base.html" %} {% block title %}About - Ceylon Handicrafts{% endblock
+%} {% block module_imports %} import
+'/static/js/components/landing/landing-navbar.js'; import
+'/static/js/components/about/about-hero.js'; import
+'/static/js/components/about/project-overview.js'; import
+'/static/js/components/about/research-goals.js'; import
+'/static/js/components/about/researcher-section.js'; import
+'/static/js/components/about/acknowledgements-section.js'; import
+'/static/js/components/landing/site-footer.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="about-page">
+  <landing-navbar></landing-navbar>
+
+  <div class="page-content">
+    <about-hero></about-hero>
+    <project-overview></project-overview>
+    <research-goals></research-goals>
+    <researcher-section></researcher-section>
+    <acknowledgements-section></acknowledgements-section>
+  </div>
+
+  <site-footer></site-footer>
+</div>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #3e2723;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .about-page {
+    min-height: 100vh;
+    width: 100%;
+    display: block;
+  }
+
+  .page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+</style>
+{% endblock %}

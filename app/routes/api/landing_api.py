@@ -8,13 +8,15 @@ import os
 from pathlib import Path
 
 from ...database import get_db
-from ...models import Bid, CartItem, Product, ProductType, Rating
+from ...models import Bid, CartItem, Product, ProductType, Rating, Category
 
 
 class CategoryResponse(BaseModel):
     id: str
     title: str
+    image: Optional[str] = None
     icon: Optional[str] = None
+    description: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,6 +35,13 @@ class ProductResponse(BaseModel):
 
 
 router = APIRouter(prefix="/api/landing")
+
+
+@router.get("/categories", response_model=List[CategoryResponse])
+async def get_categories(db: Session = Depends(get_db)):
+    """Get all categories for display on the landing page"""
+    categories = db.query(Category).all()
+    return categories
 
 
 @router.get("/cart/count")

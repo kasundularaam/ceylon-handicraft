@@ -3,6 +3,9 @@ Lankan Artisanal Products{% endblock %} {% block module_imports %} import
 '/static/js/components/landing/landing-navbar.js'; import
 '/static/js/components/landing/landing-carousal.js'; import
 '/static/js/components/landing/featured-products-section.js'; import
+'/static/js/components/landing/categories-section.js'; import
+'/static/js/components/landing/site-footer.js'; import
+'/static/js/components/landing/vishva-intro.js'; import
 '/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
 endblock %} {% block content %}
 <div class="landing-page">
@@ -13,11 +16,19 @@ endblock %} {% block content %}
   <div class="content-container">
     <featured-products-section title="Featured Products For Sale" type="sale">
     </featured-products-section>
+  </div>
 
-    <!-- Featured Auction Products Section -->
+  <vishva-intro></vishva-intro>
+
+  <div class="content-container">
+    <categories-section></categories-section>
+  </div>
+
+  <div class="content-container">
     <featured-products-section title="Featured Auction Items" type="auction">
     </featured-products-section>
   </div>
+  <site-footer></site-footer>
 </div>
 
 <style>

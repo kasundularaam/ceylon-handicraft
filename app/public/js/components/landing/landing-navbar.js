@@ -1,4 +1,3 @@
-// app/public/js/components/landing/landing-navbar.js
 import { LitElement, html } from "https://esm.run/lit";
 import { fetchJson } from "../../utils/api_utils.js";
 import {
@@ -16,6 +15,7 @@ class LandingNavbar extends LitElement {
       username: { type: String },
       isBuyer: { type: Boolean },
       menuOpen: { type: Boolean },
+      currentPath: { type: String }, // Added property to track current path
     };
   }
 
@@ -26,10 +26,7 @@ class LandingNavbar extends LitElement {
     this.username = "";
     this.isBuyer = false;
     this.menuOpen = false;
-
-    window.addEventListener("cart-updated", (e) => {
-      this.cartCount = e.detail.count;
-    });
+    this.currentPath = window.location.pathname; // Initialize with current path
   }
 
   createRenderRoot() {
@@ -40,6 +37,12 @@ class LandingNavbar extends LitElement {
     super.connectedCallback();
     this.checkAuthStatus();
     this.fetchCartCount();
+    this.currentPath = window.location.pathname;
+
+    // Listen for navigation events (for single-page app navigation)
+    window.addEventListener("popstate", () => {
+      this.currentPath = window.location.pathname;
+    });
   }
 
   async checkAuthStatus() {
@@ -71,6 +74,17 @@ class LandingNavbar extends LitElement {
     window.location.href = "/";
   }
 
+  // Helper method to check if a path matches the current path
+  isActive(path) {
+    // Basic check for exact match
+    if (this.currentPath === path) return true;
+
+    // Special case for non-root paths (check if currentPath starts with given path)
+    if (path !== "/" && this.currentPath.startsWith(path)) return true;
+
+    return false;
+  }
+
   render() {
     return html`
       <nav class="landing-navbar">
@@ -91,10 +105,39 @@ class LandingNavbar extends LitElement {
 
           <div class="navbar-menu ${this.menuOpen ? "active" : ""}">
             <ul class="navbar-links">
-              <li><a href="/" class="active">Home</a></li>
-              <li><a href="/vishva">Vishva</a></li>
-              <li><a href="/shop">Shop</a></li>
-              <li><a href="/about">About</a></li>
+              <li>
+                <a href="/" class="${this.isActive("/") ? "active" : ""}"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/vishva"
+                  class="${this.isActive("/vishva") ? "active" : ""}"
+                  >Vishva</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/sale"
+                  class="${this.isActive("/sale") ? "active" : ""}"
+                  >Shop</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/auction"
+                  class="${this.isActive("/auction") ? "active" : ""}"
+                  >Auction</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/about"
+                  class="${this.isActive("/about") ? "active" : ""}"
+                  >About</a
+                >
+              </li>
             </ul>
 
             <div class="navbar-actions">
@@ -141,6 +184,7 @@ class LandingNavbar extends LitElement {
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
+        /* Rest of the CSS remains unchanged */
         .navbar-container {
           display: flex;
           justify-content: space-between;

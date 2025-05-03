@@ -141,6 +141,14 @@ async def auction_products(request: Request):
     )
 
 
+@router.get("/about", response_class=HTMLResponse)
+async def auction_products(request: Request):
+    return templates.TemplateResponse(
+        "pages/global/about.html",
+        {"request": request}
+    )
+
+
 @router.get("/sale/{product_id}", response_class=HTMLResponse)
 async def sale_product_detail(request: Request, product_id: str):
     return templates.TemplateResponse(
