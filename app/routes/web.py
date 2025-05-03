@@ -142,7 +142,7 @@ async def auction_products(request: Request):
 
 
 @router.get("/about", response_class=HTMLResponse)
-async def auction_products(request: Request):
+async def about(request: Request):
     return templates.TemplateResponse(
         "pages/global/about.html",
         {"request": request}
@@ -162,4 +162,34 @@ async def auction_product_detail(request: Request, product_id: str):
     return templates.TemplateResponse(
         "pages/products/product_detail.html",
         {"request": request, "product_id": product_id, "product_type": "auction"}
+    )
+
+# Vishva Chats page
+
+
+@router.get("/vishva/chats", response_class=HTMLResponse)
+async def vishva_chats(request: Request):
+    """
+    Serve the Vishva chats list page
+    """
+    return templates.TemplateResponse(
+        "pages/vishva/chats.html",
+        {"request": request}
+    )
+
+# Vishva Chat page
+
+
+@router.get("/vishva/chat", response_class=HTMLResponse)
+async def vishva_chat(request: Request, id: str = None):
+    """
+    Serve the Vishva chat page
+
+    Args:
+        request: The FastAPI request object
+        id: The chat ID (optional)
+    """
+    return templates.TemplateResponse(
+        "pages/vishva/chat.html",
+        {"request": request, "chat_id": id or ""}
     )

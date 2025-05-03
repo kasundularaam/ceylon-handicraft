@@ -112,7 +112,7 @@ class LandingNavbar extends LitElement {
               </li>
               <li>
                 <a
-                  href="/vishva"
+                  href="/vishva/chats"
                   class="${this.isActive("/vishva") ? "active" : ""}"
                   >Vishva</a
                 >

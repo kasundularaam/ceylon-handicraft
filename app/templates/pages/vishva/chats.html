@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block title %}Vishva Chats - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import
+'/static/js/components/vishva/chat-list.js'; import
+'/static/js/components/vishva/new-chat-button.js'; import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; {%
+endblock %} {% block content %}
+<div class="vishva-page">
+  <app-header></app-header>
+
+  <div class="vishva-container">
+    <h1 class="vishva-title">Chat with Vishva</h1>
+
+    <div class="prominent-button">
+      <new-chat-button size="medium"></new-chat-button>
+    </div>
+
+    <div class="vishva-content">
+      <chat-list></chat-list>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --primary-color: #3e2723;
+    --secondary-color: #5d4037;
+    --accent-color: #ffd700;
+    --text-color: #ffffff;
+    --text-secondary: #e0e0e0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    font-family: "Poppins", sans-serif;
+  }
+
+  .vishva-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vishva-container {
+    flex: 1;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vishva-title {
+    color: var(--accent-color);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+  }
+
+  .prominent-button {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .vishva-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .vishva-container {
+      width: 95%;
+      padding: 1rem;
+      margin: 1rem auto;
+    }
+
+    .vishva-title {
+      font-size: 2rem;
+    }
+  }
+</style>
+{% endblock %}

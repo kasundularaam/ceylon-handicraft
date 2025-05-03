@@ -15,12 +15,18 @@ from app.routes.api.auth_api import router as auth_api_router
 from app.routes.api.category_api import router as category_api_router
 from app.routes.api.product_api import router as product_api_router
 from app.routes.api.craftsman_api import router as craftsman_api_router
+from app.routes.api.vishva_api import router as vishva_api_router
 
 # Define lifespan context manager
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create vishva_library directory if it doesn't exist
+    vishva_library_path = Path("vishva_library")
+    vishva_library_path.mkdir(exist_ok=True)
+
+    # Initialize database
     init_db()
     yield
 
@@ -46,6 +52,7 @@ app.include_router(auth_api_router)
 app.include_router(category_api_router)
 app.include_router(product_api_router)
 app.include_router(craftsman_api_router)
+app.include_router(vishva_api_router)
 
 if __name__ == "__main__":
     import uvicorn

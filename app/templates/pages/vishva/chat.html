@@ -1,0 +1,135 @@
+{% extends "base.html" %} {% block title %}Chat with Vishva - Ceylon
+Handicrafts{% endblock %} {% block module_imports %} import
+'/static/js/components/vishva/chat-window.js'; import
+'/static/js/components/vishva/message-input.js'; import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; {%
+endblock %} {% block content %}
+<div class="vishva-page">
+  <app-header></app-header>
+
+  <div class="vishva-container">
+    <div class="vishva-chat-header">
+      <a href="/vishva/chats" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Chats
+      </a>
+      <h1 class="vishva-title">
+        <img
+          src="/static/images/vishva/avatar.jpg"
+          alt="Vishva"
+          class="vishva-avatar"
+        />
+        <span id="chat-title">Chat with Vishva</span>
+      </h1>
+    </div>
+
+    <div class="vishva-chat-main">
+      <chat-window chat-id="{{ chat_id }}"></chat-window>
+    </div>
+
+    <div class="vishva-chat-footer">
+      <message-input chat-id="{{ chat_id }}"></message-input>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --primary-color: #3e2723;
+    --secondary-color: #5d4037;
+    --accent-color: #ffd700;
+    --text-color: #ffffff;
+    --text-secondary: #e0e0e0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    font-family: "Poppins", sans-serif;
+  }
+
+  .vishva-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vishva-container {
+    flex: 1;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0;
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+  }
+
+  .vishva-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .back-button {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+  }
+
+  .back-button:hover {
+    color: var(--accent-color);
+  }
+
+  .vishva-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+  }
+
+  .vishva-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+  }
+
+  .vishva-chat-main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  .vishva-chat-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .vishva-container {
+      width: 95%;
+      padding: 0;
+      margin: 1rem auto;
+      height: calc(100vh - 140px);
+    }
+
+    .vishva-title {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+{% endblock %}
