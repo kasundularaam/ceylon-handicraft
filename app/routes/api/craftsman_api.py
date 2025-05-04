@@ -1,174 +1,257 @@
-# File: app/routes/api/craftsman_api.py
-
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import func
-from datetime import datetime, timedelta
-
+from sqlalchemy.orm import Session
 from ...database import get_db
-from ...models import Product, OrderItem, OrderStatus, Rating, User
+from ...models import OrderItem, Product, User, UserRole, OrderStatus
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/craftsman")
 
-# Get craftsman insights data
 
-
-@router.get("/insights/{insight_type}")
-async def get_insight(
-    insight_type: str,
+@router.get("/dashboard")
+async def get_craftsman_dashboard(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # Check if user is authenticated and is a craftsman
+    # Ensure user is authenticated and is a craftsman
     if not request.state.user:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     if request.state.user.role.value != "Craftsman":
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    current_user = request.state.user
+    craftsman_id = request.state.user.id
 
-    if insight_type == "earnings":
-        # Calculate total earnings (unit_price * quantity)
-        total_earnings = db.query(func.sum(OrderItem.unit_price * OrderItem.quantity)).join(
-            Product, OrderItem.product_id == Product.id
-        ).filter(
-            Product.user_id == current_user.id,
-            OrderItem.status != OrderStatus.DENIED
-        ).scalar() or 0
+    # Get total completed sales
+    total_completed_sales = db.query(
+        func.sum(OrderItem.unit_price * OrderItem.quantity)
+    ).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.user_id == craftsman_id,
+        OrderItem.status == OrderStatus.DELIVERED
+    ).scalar() or 0
 
-        return {"value": f"{total_earnings:.2f}"}
+    # Get total pending sales
+    total_pending_sales = db.query(
+        func.sum(OrderItem.unit_price * OrderItem.quantity)
+    ).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.user_id == craftsman_id,
+        OrderItem.status.in_([
+            OrderStatus.INITIATED,
+            OrderStatus.PAID,
+            OrderStatus.ACCEPTED,
+            OrderStatus.DEPARTED
+        ])
+    ).scalar() or 0
 
-    elif insight_type == "orders":
-        # Count total orders
-        order_count = db.query(func.count(OrderItem.id)).join(
-            Product, OrderItem.product_id == Product.id
-        ).filter(
-            Product.user_id == current_user.id
-        ).scalar() or 0
+    # Get total products
+    total_products = db.query(func.count(Product.id)).filter(
+        Product.user_id == craftsman_id
+    ).scalar() or 0
 
-        return {"value": str(order_count)}
+    # Get delivered orders count
+    delivered_orders_count = db.query(
+        func.count(OrderItem.id)
+    ).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.user_id == craftsman_id,
+        OrderItem.status == OrderStatus.DELIVERED
+    ).scalar() or 0
 
-    elif insight_type == "products":
-        # Count total products
-        product_count = db.query(func.count(Product.id)).filter(
-            Product.user_id == current_user.id
-        ).scalar() or 0
+    # Get pending orders count
+    pending_orders_count = db.query(
+        func.count(OrderItem.id)
+    ).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.user_id == craftsman_id,
+        OrderItem.status.in_([
+            OrderStatus.INITIATED,
+            OrderStatus.PAID,
+            OrderStatus.ACCEPTED,
+            OrderStatus.DEPARTED
+        ])
+    ).scalar() or 0
 
-        return {"value": str(product_count)}
-
-    elif insight_type == "ratings":
-        # Calculate average rating
-        avg_rating = db.query(func.avg(Rating.rating)).join(
-            OrderItem, Rating.order_item_id == OrderItem.id
-        ).join(
-            Product, OrderItem.product_id == Product.id
-        ).filter(
-            Product.user_id == current_user.id
-        ).scalar() or 0
-
-        return {"value": f"{avg_rating:.1f}"}
-
-    else:
-        raise HTTPException(status_code=400, detail="Invalid insight type")
-
-# Get weekly sales data
+    return {
+        "totalCompletedSales": float(total_completed_sales),
+        "totalPendingSales": float(total_pending_sales),
+        "totalProducts": total_products,
+        "deliveredOrdersCount": delivered_orders_count,
+        "pendingOrdersCount": pending_orders_count
+    }
 
 
-@router.get("/sales/weekly")
-async def get_weekly_sales(
+@router.get("/weekly-sales")
+async def get_craftsman_weekly_sales(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # Check if user is authenticated and is a craftsman
+    # Ensure user is authenticated and is a craftsman
     if not request.state.user:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     if request.state.user.role.value != "Craftsman":
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    current_user = request.state.user
+    craftsman_id = request.state.user.id
 
-    # Calculate dates for the last 7 days
-    today = datetime.now()
-    dates = [(today - timedelta(days=i)).strftime("%Y-%m-%d")
-             for i in range(6, -1, -1)]
+    # Get dates for last 7 days
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=6)
 
-    # Get sales for each day
-    results = []
+    # Create array of dates
+    dates = []
+    current_date = start_date
+    while current_date <= end_date:
+        dates.append(current_date.strftime("%Y-%m-%d"))
+        current_date += timedelta(days=1)
+
+    # Get completed sales for each day
+    completed_sales = []
     for date_str in dates:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         next_day = date_obj + timedelta(days=1)
 
-        daily_sales = db.query(func.sum(OrderItem.unit_price * OrderItem.quantity)).join(
+        daily_sales = db.query(
+            func.sum(OrderItem.unit_price * OrderItem.quantity)
+        ).join(
             Product, OrderItem.product_id == Product.id
         ).filter(
-            Product.user_id == current_user.id,
+            Product.user_id == craftsman_id,
             OrderItem.created_at >= date_obj,
             OrderItem.created_at < next_day,
-            OrderItem.status != OrderStatus.DENIED
+            OrderItem.status == OrderStatus.DELIVERED
         ).scalar() or 0
 
-        results.append(daily_sales)
+        completed_sales.append(float(daily_sales))
 
-    # Format day labels for display
-    day_labels = [(today - timedelta(days=i)).strftime("%a")
-                  for i in range(6, -1, -1)]
+    # Get pending sales for each day
+    pending_sales = []
+    for date_str in dates:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        next_day = date_obj + timedelta(days=1)
+
+        daily_pending = db.query(
+            func.sum(OrderItem.unit_price * OrderItem.quantity)
+        ).join(
+            Product, OrderItem.product_id == Product.id
+        ).filter(
+            Product.user_id == craftsman_id,
+            OrderItem.created_at >= date_obj,
+            OrderItem.created_at < next_day,
+            OrderItem.status.in_([
+                OrderStatus.INITIATED,
+                OrderStatus.PAID,
+                OrderStatus.ACCEPTED,
+                OrderStatus.DEPARTED
+            ])
+        ).scalar() or 0
+
+        pending_sales.append(float(daily_pending))
+
+    # Format day labels
+    day_labels = [(datetime.strptime(date, "%Y-%m-%d")).strftime("%a")
+                  for date in dates]
 
     return {
         "labels": day_labels,
-        "values": results
+        "completedSales": completed_sales,
+        "pendingSales": pending_sales
     }
 
-# Get product reviews
 
-
-@router.get("/reviews")
-async def get_reviews(
+@router.get("/orders-by-status")
+async def get_craftsman_orders_by_status(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # Check if user is authenticated and is a craftsman
+    # Ensure user is authenticated and is a craftsman
     if not request.state.user:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     if request.state.user.role.value != "Craftsman":
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    current_user = request.state.user
+    craftsman_id = request.state.user.id
 
-    # Get the most recent reviews for the craftsman's products
-    reviews_data = db.query(
-        Rating, OrderItem, Product, User
-    ).join(
-        OrderItem, Rating.order_item_id == OrderItem.id
+    # Query to count orders by status
+    status_counts = db.query(
+        OrderItem.status,
+        func.count(OrderItem.id).label('count')
     ).join(
         Product, OrderItem.product_id == Product.id
-    ).join(
-        User, OrderItem.user_id == User.id
     ).filter(
-        Product.user_id == current_user.id
+        Product.user_id == craftsman_id
+    ).group_by(
+        OrderItem.status
+    ).all()
+
+    # Convert to dictionary
+    result = {}
+    for status in OrderStatus:
+        result[status.value] = 0
+
+    for row in status_counts:
+        result[row.status.value] = row.count
+
+    # Format for chart
+    status_data = [
+        {"status": status, "count": count}
+        for status, count in result.items()
+    ]
+
+    return {
+        "ordersByStatus": status_data
+    }
+
+
+@router.get("/recent-orders")
+async def get_craftsman_recent_orders(
+    request: Request,
+    limit: int = Query(5, ge=1, le=20),
+    db: Session = Depends(get_db)
+):
+    # Ensure user is authenticated and is a craftsman
+    if not request.state.user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    if request.state.user.role.value != "Craftsman":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    craftsman_id = request.state.user.id
+
+    # Get recent orders
+    recent_orders = db.query(OrderItem).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.user_id == craftsman_id
     ).order_by(
-        Rating.id.desc()
-    ).limit(5).all()
+        OrderItem.created_at.desc()
+    ).limit(limit).all()
 
-    reviews = []
-    for rating, order_item, product, user in reviews_data:
-        # Get the first image if available
-        product_image = None
-        if hasattr(product, 'attachments') and product.attachments and len(product.attachments) > 0:
-            product_image = product.attachments[0].url
+    # Format for response
+    orders_data = []
+    for order in recent_orders:
+        order_date = order.created_at
+        if isinstance(order_date, str):
+            formatted_date = order_date
+        else:
+            formatted_date = order_date.strftime('%Y-%m-%d %H:%M:%S')
 
-        reviews.append({
-            "id": rating.id,
-            "rating": rating.rating,
-            "description": rating.description,
-            "created_at": order_item.created_at.isoformat(),
-            "product_id": product.id,
-            "product_title": product.title,
-            "product_image": product_image,
-            "user_name": user.name,
-            "order_id": order_item.id
+        orders_data.append({
+            "id": order.id,
+            "product": order.product.title,
+            "buyer": order.user.name,
+            "status": order.status.value,
+            "amount": float(order.unit_price * order.quantity),
+            "date": formatted_date
         })
 
-    return {"reviews": reviews}
+    return {
+        "recentOrders": orders_data
+    }

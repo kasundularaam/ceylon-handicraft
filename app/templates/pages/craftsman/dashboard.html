@@ -2,35 +2,12 @@
 Handicrafts{% endblock %} {% block module_imports %} import
 '/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
 '/static/js/components/craftsman/craftsman-navbar.js'; import
-'/static/js/components/craftsman/insight-card.js'; import
-'/static/js/components/craftsman/sales-chart.js'; import
-'/static/js/components/craftsman/review-list.js'; {% endblock %} {% block
-content %}
+'/static/js/components/craftsman/craftsman-dashboard.js'; {% endblock %} {%
+block content %}
 <div class="craftsman-dashboard">
   <craftsman-navbar></craftsman-navbar>
 
-  <div class="dashboard-content">
-    <div class="dashboard-header">
-      <h1>Craftsman Dashboard</h1>
-    </div>
-
-    <div class="insight-cards-container">
-      <insight-card type="earnings"></insight-card>
-      <insight-card type="orders"></insight-card>
-      <insight-card type="products"></insight-card>
-      <insight-card type="ratings"></insight-card>
-    </div>
-
-    <div class="chart-container">
-      <h2>Sales Last 7 Days</h2>
-      <sales-chart></sales-chart>
-    </div>
-
-    <div class="reviews-container">
-      <h2>Recent Reviews</h2>
-      <review-list></review-list>
-    </div>
-  </div>
+  <craftsman-dashboard></craftsman-dashboard>
 </div>
 
 <style>
@@ -43,61 +20,6 @@ content %}
     width: 100%;
     overflow-x: hidden;
     background-color: #3e2723;
-  }
-
-  .craftsman-dashboard {
-    min-height: 100vh;
-    background-color: #3e2723;
-    color: #ffffff;
-  }
-
-  .dashboard-content {
-    padding: 1.5rem;
-  }
-
-  .dashboard-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .dashboard-header h1 {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin: 0;
-    color: #ffd700;
-  }
-
-  .insight-cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .chart-container {
-    background-color: #5d4037;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-
-  .chart-container h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-
-  .reviews-container {
-    background-color: #5d4037;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-
-  .reviews-container h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
   }
 </style>
 {% endblock %}
