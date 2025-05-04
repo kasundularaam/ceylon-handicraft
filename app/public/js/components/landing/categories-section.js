@@ -44,26 +44,82 @@ class CategoriesSection extends LitElement {
   render() {
     return html`
       <section class="categories-section">
-        <div class="categories-header">
-          <h2 class="section-title">Explore Our Collections</h2>
-          <p class="section-description">
-            Discover the rich traditions and craftsmanship of Sri Lankan
-            artisans
-          </p>
-          <div class="section-divider"></div>
+        <!-- Background image and overlay -->
+        <div class="categories-bg-container">
+          <div class="categories-bg-image"></div>
+          <div class="categories-bg-overlay"></div>
         </div>
 
-        ${this.loading
-          ? this.renderLoading()
-          : this.error
-          ? this.renderError()
-          : this.renderCategories()}
+        <div class="categories-content">
+          <div class="categories-header">
+            <h2 class="category-section-title">Explore Our Collections</h2>
+            <p class="section-description">
+              Discover the rich traditions and craftsmanship of Sri Lankan
+              artisans
+            </p>
+            <div class="section-divider"></div>
+          </div>
+
+          ${this.loading
+            ? this.renderLoading()
+            : this.error
+            ? this.renderError()
+            : this.renderCategories()}
+        </div>
       </section>
 
       <style>
         .categories-section {
           margin: 5rem 0;
           width: 100%;
+          position: relative;
+          padding: 4rem 2rem;
+          border-radius: 24px;
+          overflow: hidden;
+        }
+
+        /* Background and overlay styles */
+        .categories-bg-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 0;
+        }
+
+        .categories-bg-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: url("/static/images/category/background.jpg");
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          z-index: 1;
+        }
+
+        .categories-bg-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            to bottom,
+            rgba(30, 15, 10, 0.85) 0%,
+            rgba(30, 15, 10, 0.95) 100%
+          );
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          z-index: 2;
+        }
+
+        .categories-content {
+          position: relative;
+          z-index: 3;
         }
 
         .categories-header {
@@ -71,11 +127,12 @@ class CategoriesSection extends LitElement {
           margin-bottom: 2.5rem;
         }
 
-        .section-title {
+        .category-section-title {
           font-size: 2.2rem;
           font-weight: 700;
           margin-bottom: 0.5rem;
           color: #ffffff;
+          text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
         .section-description {
@@ -83,6 +140,7 @@ class CategoriesSection extends LitElement {
           color: #e0e0e0;
           max-width: 700px;
           margin: 0 auto 0.8rem;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .section-divider {
@@ -306,7 +364,11 @@ class CategoriesSection extends LitElement {
 
         /* Responsive styles */
         @media (max-width: 768px) {
-          .section-title {
+          .categories-section {
+            padding: 3rem 1.5rem;
+          }
+
+          .category-section-title {
             font-size: 1.8rem;
           }
 
@@ -321,6 +383,10 @@ class CategoriesSection extends LitElement {
         }
 
         @media (max-width: 480px) {
+          .categories-section {
+            padding: 2.5rem 1rem;
+          }
+
           .categories-grid {
             grid-template-columns: 1fr;
           }

@@ -115,7 +115,7 @@ class CartList extends LitElement {
           <p>
             Discover unique handcrafted treasures from Ceylon's finest artisans.
           </p>
-          <a href="/products" class="browse-btn">Browse Products</a>
+          <a href="/sale" class="browse-btn">Browse Products</a>
         </div>
       `;
     }

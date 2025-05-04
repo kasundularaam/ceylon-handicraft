@@ -108,6 +108,14 @@ class MessageInput extends LitElement {
       // Check if this is the first message in the chat (for title generation)
       const needsTitle = await this.isFirstMessage();
 
+      // Show Vishva typing indicator
+      const typingEvent = new CustomEvent("vishva-typing", {
+        detail: { isTyping: true },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(typingEvent);
+
       // Send the message to the API
       const response = await postJson(
         `/api/vishva/chats/${this.chatId}/messages`,
@@ -121,7 +129,15 @@ class MessageInput extends LitElement {
         await this.generateTitle(currentMessage);
       }
 
-      // Dispatch event with new messages
+      // Hide Vishva typing indicator
+      const doneTypingEvent = new CustomEvent("vishva-typing", {
+        detail: { isTyping: false },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(doneTypingEvent);
+
+      // Dispatch event with both messages from the API response
       if (response.user_message && response.vishva_message) {
         const event = new CustomEvent("vishva-new-message", {
           detail: {
@@ -137,6 +153,15 @@ class MessageInput extends LitElement {
       this.sending = false;
     } catch (error) {
       console.error("Error sending message:", error);
+
+      // Hide Vishva typing indicator on error
+      const doneTypingEvent = new CustomEvent("vishva-typing", {
+        detail: { isTyping: false },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(doneTypingEvent);
+
       this.error = error.message || "Failed to send message";
       this.sending = false;
       // Restore the message if sending failed
@@ -212,9 +237,7 @@ class MessageInput extends LitElement {
             @click=${this.sendMessage}
             ?disabled=${!this.message.trim() || this.sending}
           >
-            ${this.sending
-              ? html` <div class="send-spinner"></div> `
-              : html` <i class="fas fa-paper-plane"></i> `}
+            <i class="fas fa-paper-plane"></i>
           </button>
         </div>
 
@@ -290,24 +313,6 @@ class MessageInput extends LitElement {
           background-color: rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 0.3);
           cursor: not-allowed;
-        }
-
-        .send-spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid rgba(62, 39, 35, 0.2);
-          border-top: 2px solid var(--primary-color, #3e2723);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
         }
 
         .input-help {

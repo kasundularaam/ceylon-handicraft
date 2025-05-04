@@ -1,23 +1,43 @@
 // app/public/js/components/landing/landing-carousal.js
 import { LitElement, html } from "https://esm.run/lit";
-import { fetchJson } from "../../utils/api_utils.js";
 
 class LandingCarousal extends LitElement {
   static get properties() {
     return {
       slides: { type: Array },
       currentSlide: { type: Number },
-      isLoading: { type: Boolean },
-      error: { type: String },
     };
   }
 
   constructor() {
     super();
-    this.slides = [];
+    this.slides = [
+      {
+        id: 1,
+        title: "Welcome to Ceylon Handicrafts",
+        subtitle: "Discover authentic Sri Lankan craftsmanship",
+        image: "/static/images/hero/welcome.jpg",
+        cta: "Explore Collection",
+        link: "/sale",
+      },
+      {
+        id: 2,
+        title: "Why We're Different",
+        subtitle: "Direct connections to skilled artisans across Sri Lanka",
+        image: "/static/images/hero/different.jpg",
+        cta: "Learn More",
+        link: "/about",
+      },
+      {
+        id: 3,
+        title: "Vishva AI — Your Cultural Companion",
+        subtitle: "Get personalized guidance from our AI assistant",
+        image: "/static/images/hero/vishva.jpg",
+        cta: "Chat with Vishva",
+        link: "/vishva/chats",
+      },
+    ];
     this.currentSlide = 0;
-    this.isLoading = true;
-    this.error = "";
     this.autoplayInterval = null;
   }
 
@@ -27,61 +47,13 @@ class LandingCarousal extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.fetchCarouselData();
+    this.startAutoplay();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     if (this.autoplayInterval) {
       clearInterval(this.autoplayInterval);
-    }
-  }
-
-  async fetchCarouselData() {
-    try {
-      // Use sample data until API endpoint is available
-      const data = {
-        slides: [
-          {
-            id: 1,
-            title: "Welcome to Ceylon Handicrafts",
-            subtitle: "Discover authentic Sri Lankan craftsmanship",
-            image: "/static/images/hero/welcome.jpg",
-            cta: "Explore Collection",
-            link: "/shop",
-          },
-          {
-            id: 2,
-            title: "Why We're Different",
-            subtitle: "Direct connections to skilled artisans across Sri Lanka",
-            image: "/static/images/hero/different.jpg",
-            cta: "Learn More",
-            link: "/about",
-          },
-          {
-            id: 3,
-            title: "Vishva AI — Your Cultural Companion",
-            subtitle: "Get personalized guidance from our AI assistant",
-            image: "/static/images/hero/vishva.jpg",
-            cta: "Chat with Vishva",
-            link: "/vishva",
-          },
-        ],
-      };
-
-      // Uncomment when API is ready
-      // const data = await fetchJson('/api/landing/carousel');
-
-      this.slides = data.slides || [];
-      this.isLoading = false;
-
-      if (this.slides.length > 0) {
-        this.startAutoplay();
-      }
-    } catch (error) {
-      console.error("Error fetching carousel data:", error);
-      this.error = "Failed to load carousel data";
-      this.isLoading = false;
     }
   }
 
@@ -110,23 +82,6 @@ class LandingCarousal extends LitElement {
   }
 
   render() {
-    if (this.isLoading) {
-      return html`
-        <div class="carousel-loading">
-          <div class="spinner"></div>
-          <p>Loading beautiful crafts...</p>
-        </div>
-      `;
-    }
-
-    if (this.error) {
-      return html`
-        <div class="carousel-error">
-          <p>${this.error}</p>
-        </div>
-      `;
-    }
-
     return html`
       <div class="carousel-container">
         <div class="carousel-wrapper">
@@ -348,37 +303,6 @@ class LandingCarousal extends LitElement {
         .indicator.active {
           background-color: #ffd700;
           transform: scale(1.2);
-        }
-
-        .carousel-loading,
-        .carousel-error {
-          width: 100%;
-          height: calc(100vh - 76px);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          color: #ffffff;
-          background-color: #3e2723;
-        }
-
-        .spinner {
-          width: 50px;
-          height: 50px;
-          border: 5px solid rgba(255, 215, 0, 0.3);
-          border-radius: 50%;
-          border-top-color: #ffd700;
-          animation: spin 1s linear infinite;
-          margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
         }
 
         @media (max-width: 768px) {

@@ -14,6 +14,7 @@ class ChatWindow extends LitElement {
       loading: { type: Boolean },
       error: { type: String },
       lastFetchTime: { type: Number },
+      vishvaIsTyping: { type: Boolean }, // New property for Vishva typing indicator
     };
   }
 
@@ -25,6 +26,7 @@ class ChatWindow extends LitElement {
     this.error = null;
     this.lastFetchTime = 0;
     this.refreshInterval = null;
+    this.vishvaIsTyping = false; // Initialize typing state
   }
 
   // Disable Shadow DOM to access global styles
@@ -54,6 +56,12 @@ class ChatWindow extends LitElement {
       "vishva-new-message",
       this.handleNewMessage.bind(this)
     );
+
+    // Listen for Vishva typing events
+    window.addEventListener(
+      "vishva-typing",
+      this.handleVishvaTyping.bind(this)
+    );
   }
 
   disconnectedCallback() {
@@ -64,10 +72,15 @@ class ChatWindow extends LitElement {
       this.refreshInterval = null;
     }
 
-    // Remove event listener
+    // Remove event listeners
     window.removeEventListener(
       "vishva-new-message",
       this.handleNewMessage.bind(this)
+    );
+
+    window.removeEventListener(
+      "vishva-typing",
+      this.handleVishvaTyping.bind(this)
     );
   }
 
@@ -130,12 +143,33 @@ class ChatWindow extends LitElement {
   handleNewMessage(event) {
     if (event.detail) {
       const { userMessage, vishvaMessage } = event.detail;
-      if (userMessage && vishvaMessage) {
-        // Add new messages to the list
-        this.messages = [...this.messages, userMessage, vishvaMessage];
+      if (userMessage) {
+        // Add user message immediately
+        this.messages = [...this.messages, userMessage];
 
-        // Scroll to bottom when new messages are added
+        // Show Vishva typing indicator
+        this.vishvaIsTyping = true;
+
+        // Scroll to bottom when new message is added
         setTimeout(() => this.scrollToBottom(), 100);
+
+        // If we already have Vishva's response, add it after a delay
+        if (vishvaMessage) {
+          setTimeout(() => {
+            this.vishvaIsTyping = false;
+            this.messages = [...this.messages, vishvaMessage];
+            setTimeout(() => this.scrollToBottom(), 100);
+          }, 1000); // Show typing indicator for at least 1 second
+        }
+      }
+    }
+  }
+
+  handleVishvaTyping(event) {
+    if (event.detail && typeof event.detail.isTyping === "boolean") {
+      this.vishvaIsTyping = event.detail.isTyping;
+      if (this.vishvaIsTyping) {
+        this.scrollToBottom();
       }
     }
   }
@@ -231,6 +265,20 @@ class ChatWindow extends LitElement {
     `;
   }
 
+  renderVishvaTypingIndicator() {
+    return html`
+      <div class="message-item vishva-message vishva-typing">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   triggerSampleQuestion(question) {
     const event = new CustomEvent("vishva-sample-question", {
       detail: { question },
@@ -273,6 +321,7 @@ class ChatWindow extends LitElement {
                   : this.messages.map((message) =>
                       this.renderMessageItem(message)
                     )}
+                ${this.vishvaIsTyping ? this.renderVishvaTypingIndicator() : ""}
               </div>
             `}
       </div>
@@ -303,10 +352,14 @@ class ChatWindow extends LitElement {
         .message-item {
           display: flex;
           max-width: 85%;
+          width: fit-content; /* Ensures the message only takes up needed space */
         }
 
         .user-message {
           align-self: flex-end;
+          margin-left: auto; /* Ensures right alignment without overflow */
+          margin-right: 20px; /* Increased space from the right edge */
+          max-width: 85%; /* Limit width to prevent overflow */
         }
 
         .vishva-message {
@@ -318,6 +371,8 @@ class ChatWindow extends LitElement {
           border-radius: 12px;
           position: relative;
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          width: 100%; /* Ensure content uses full available width */
+          word-wrap: break-word; /* Ensure long words break */
         }
 
         .user-message .message-content {
@@ -338,6 +393,7 @@ class ChatWindow extends LitElement {
           line-height: 1.5;
           white-space: pre-wrap;
           word-break: break-word;
+          overflow-wrap: break-word; /* Help with long words */
         }
 
         .user-message .message-text {
@@ -392,6 +448,51 @@ class ChatWindow extends LitElement {
           }
           100% {
             transform: rotate(360deg);
+          }
+        }
+
+        /* Vishva Typing Indicator */
+        .vishva-typing .message-content {
+          min-width: 70px; /* Minimum width for the typing indicator */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 20px;
+        }
+
+        .typing-indicator span {
+          height: 8px;
+          width: 8px;
+          margin: 0 2px;
+          background-color: var(--accent-color, #ffd700);
+          border-radius: 50%;
+          display: inline-block;
+          opacity: 0.7;
+        }
+
+        .typing-indicator span:nth-child(1) {
+          animation: bounce 1.2s infinite 0.1s;
+        }
+        .typing-indicator span:nth-child(2) {
+          animation: bounce 1.2s infinite 0.3s;
+        }
+        .typing-indicator span:nth-child(3) {
+          animation: bounce 1.2s infinite 0.5s;
+        }
+
+        @keyframes bounce {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
           }
         }
 
@@ -491,6 +592,10 @@ class ChatWindow extends LitElement {
 
         @media (max-width: 768px) {
           .message-item {
+            max-width: 90%;
+          }
+
+          .user-message {
             max-width: 90%;
           }
 

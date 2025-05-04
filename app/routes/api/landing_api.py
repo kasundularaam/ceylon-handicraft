@@ -57,39 +57,6 @@ async def get_cart_count(request: Request, db: Session = Depends(get_db)):
     return {"count": cart_count}
 
 
-@router.get("/carousel")
-async def get_carousel_data():
-    """Return data for the hero carousel"""
-    return {
-        "slides": [
-            {
-                "id": 1,
-                "title": "Welcome to Ceylon Handicrafts",
-                "subtitle": "Discover authentic Sri Lankan craftsmanship",
-                "image": "/static/images/hero/welcome.jpg",
-                "cta": "Explore Collection",
-                "link": "/shop"
-            },
-            {
-                "id": 2,
-                "title": "Why We're Different",
-                "subtitle": "Direct connections to skilled artisans across Sri Lanka",
-                "image": "/static/images/hero/different.jpg",
-                "cta": "Learn More",
-                "link": "/about"
-            },
-            {
-                "id": 3,
-                "title": "Vishva AI — Your Cultural Companion",
-                "subtitle": "Get personalized guidance from our AI assistant",
-                "image": "/static/images/hero/vishva.jpg",
-                "cta": "Chat with Vishva",
-                "link": "/vishva"
-            }
-        ]
-    }
-
-
 @router.get("/featured/sale", response_model=List[ProductResponse])
 async def get_featured_sale_products(
     limit: int = Query(8, description="Number of products to return"),

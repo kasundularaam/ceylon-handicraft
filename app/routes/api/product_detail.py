@@ -267,7 +267,7 @@ async def create_order(order: OrderRequest, request: Request, db: Session = Depe
             "success": True,
             "order_id": order_id,
             "message": "Order created successfully",
-            "redirect_url": f"/checkout/{order_id}"
+            "redirect_url": f"/checkout"
         }
     except Exception as e:
         db.rollback()

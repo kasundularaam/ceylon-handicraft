@@ -387,7 +387,7 @@ class VishvaIntro extends LitElement {
           display: flex;
           justify-content: center;
           margin-top: 2rem;
-          margin-bottom: 5rem;
+          margin-bottom: 15rem;
         }
 
         .prompt-display {
@@ -401,7 +401,7 @@ class VishvaIntro extends LitElement {
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
           width: 80%;
           max-width: 800px;
-          height: 80px;
+          height: 30px;
           overflow: hidden;
           position: relative;
         }
