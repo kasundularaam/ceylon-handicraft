@@ -5,9 +5,11 @@ class AdminInsights extends LitElement {
   static get properties() {
     return {
       totalSales: { type: Number },
+      pendingSales: { type: Number },
       totalProducts: { type: Number },
       totalCraftsmen: { type: Number },
       totalBuyers: { type: Number },
+      deliveredOrdersCount: { type: Number },
       loading: { type: Boolean },
     };
   }
@@ -15,9 +17,11 @@ class AdminInsights extends LitElement {
   constructor() {
     super();
     this.totalSales = 0;
+    this.pendingSales = 0;
     this.totalProducts = 0;
     this.totalCraftsmen = 0;
     this.totalBuyers = 0;
+    this.deliveredOrdersCount = 0;
     this.loading = true;
   }
 
@@ -34,9 +38,11 @@ class AdminInsights extends LitElement {
     try {
       const data = await fetchJson("/api/admin/insights");
       this.totalSales = data.totalSales;
+      this.pendingSales = data.pendingSales;
       this.totalProducts = data.totalProducts;
       this.totalCraftsmen = data.totalCraftsmen;
       this.totalBuyers = data.totalBuyers;
+      this.deliveredOrdersCount = data.deliveredOrdersCount;
     } catch (error) {
       console.error("Error fetching insight data:", error);
     } finally {
@@ -69,8 +75,23 @@ class AdminInsights extends LitElement {
             <i class="fas fa-dollar-sign"></i>
           </div>
           <div class="insight-content">
-            <h3>Total Sales</h3>
+            <h3>Total Completed Sales</h3>
             <p class="insight-value">${this.formatCurrency(this.totalSales)}</p>
+            <p class="insight-subtext">
+              ${this.deliveredOrdersCount} delivered orders
+            </p>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-icon pending">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="insight-content">
+            <h3>Pending Sales</h3>
+            <p class="insight-value">
+              ${this.formatCurrency(this.pendingSales)}
+            </p>
           </div>
         </div>
 
@@ -155,6 +176,11 @@ class AdminInsights extends LitElement {
           color: #4caf50;
         }
 
+        .insight-icon.pending {
+          background-color: rgba(255, 152, 0, 0.2);
+          color: #ff9800;
+        }
+
         .insight-icon.products {
           background-color: rgba(33, 150, 243, 0.2);
           color: #2196f3;
@@ -185,6 +211,12 @@ class AdminInsights extends LitElement {
           font-size: 1.5rem;
           font-weight: 700;
           color: #ffffff;
+        }
+
+        .insight-subtext {
+          margin: 0.25rem 0 0 0;
+          font-size: 0.85rem;
+          color: #bdbdbd;
         }
       </style>
     `;

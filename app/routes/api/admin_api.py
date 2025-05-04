@@ -4,7 +4,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from fastapi import Depends
 from ...database import get_db
-from ...models import User, UserRole, Product, OrderItem
+from ...models import OrderStatus, User, UserRole, Product, OrderItem
 
 router = APIRouter(prefix="/api/admin")
 
@@ -28,9 +28,23 @@ async def get_admin_profile(db: Session = Depends(get_db)):
 
 @router.get("/insights")
 async def get_admin_insights(db: Session = Depends(get_db)):
-    # Calculate total sales
-    total_sales_query = db.query(
+    # Calculate total sales from DELIVERED orders only
+    delivered_sales = db.query(
         func.sum(OrderItem.unit_price * OrderItem.quantity)
+    ).filter(
+        OrderItem.status == OrderStatus.DELIVERED
+    ).scalar() or 0
+
+    # Calculate total pending sales (orders that are not delivered/denied/failed)
+    pending_sales = db.query(
+        func.sum(OrderItem.unit_price * OrderItem.quantity)
+    ).filter(
+        OrderItem.status.in_([
+            OrderStatus.INITIATED,
+            OrderStatus.PAID,
+            OrderStatus.ACCEPTED,
+            OrderStatus.DEPARTED
+        ])
     ).scalar() or 0
 
     # Count total products
@@ -46,11 +60,18 @@ async def get_admin_insights(db: Session = Depends(get_db)):
         func.count(User.id)
     ).filter(User.role == UserRole.BUYER).scalar() or 0
 
+    # Count delivered orders
+    delivered_orders_count = db.query(
+        func.count(OrderItem.id)
+    ).filter(OrderItem.status == OrderStatus.DELIVERED).scalar() or 0
+
     return {
-        "totalSales": float(total_sales_query),
+        "totalSales": float(delivered_sales),
+        "pendingSales": float(pending_sales),
         "totalProducts": total_products,
         "totalCraftsmen": total_craftsmen,
-        "totalBuyers": total_buyers
+        "totalBuyers": total_buyers,
+        "deliveredOrdersCount": delivered_orders_count
     }
 
 
@@ -76,14 +97,24 @@ async def get_sales_data(
         func.sum(OrderItem.unit_price * OrderItem.quantity).label("total")
     ).filter(
         OrderItem.created_at >= start_date,
-        OrderItem.created_at <= end_date
+        OrderItem.created_at <= end_date,
+        # Only include DELIVERED orders
+        OrderItem.status == OrderStatus.DELIVERED
     ).group_by(
         func.date(OrderItem.created_at)
     ).all()
 
     # Convert to dictionary for easy lookup
-    sales_dict = {row.date.strftime(
-        "%Y-%m-%d"): float(row.total) for row in sales_data}
+    sales_dict = {}
+    for row in sales_data:
+        # Handle both string and datetime objects
+        if isinstance(row.date, str):
+            date_key = row.date  # Already a string
+        else:
+            # Format datetime to string
+            date_key = row.date.strftime("%Y-%m-%d")
+
+        sales_dict[date_key] = float(row.total)
 
     # Format response with all days, filling in zeros for days with no sales
     result = []
@@ -92,44 +123,6 @@ async def get_sales_data(
         result.append({
             "date": formatted_date,
             "total": sales_dict.get(date, 0)
-        })
-
-    return result
-
-
-@router.get("/orders/recent")
-async def get_recent_orders(
-    limit: int = Query(10, ge=1, le=50),
-    db: Session = Depends(get_db)
-):
-    # Query recent orders with related data
-    orders = db.query(OrderItem).order_by(
-        OrderItem.created_at.desc()
-    ).limit(limit).all()
-
-    # Format response
-    result = []
-    for order in orders:
-        result.append({
-            "id": order.id,
-            "user_id": order.user_id,
-            "product_id": order.product_id,
-            "quantity": order.quantity,
-            "unit_price": order.unit_price,
-            "status": order.status.value,
-            "created_at": order.created_at.isoformat(),
-            "updated_at": order.updated_at.isoformat(),
-            "user": {
-                "id": order.user.id,
-                "name": order.user.name,
-                "email": order.user.email
-            },
-            "product": {
-                "id": order.product.id,
-                "title": order.product.title,
-                "base_price": order.product.base_price,
-                "craftsman_id": order.product.user_id
-            }
         })
 
     return result
