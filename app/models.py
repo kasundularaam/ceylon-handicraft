@@ -15,7 +15,8 @@ class UserRole(enum.Enum):
 
 
 class OrderStatus(enum.Enum):
-    PENDING = "Pending"
+    INITIATED = "Initiated"
+    PAYED = "Paid"
     ACCEPTED = "Accepted"
     DENIED = "Denied"
     DEPARTED = "Departed"
@@ -171,7 +172,7 @@ class OrderItem(Base):
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
     status = Column(Enum(OrderStatus), nullable=False,
-                    default=OrderStatus.PENDING)
+                    default=OrderStatus.INITIATED)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(),
                         onupdate=datetime.now())

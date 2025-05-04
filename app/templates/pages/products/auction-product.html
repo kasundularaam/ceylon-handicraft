@@ -1,0 +1,69 @@
+{% extends "base.html" %} {% block title %}Auction Product - Ceylon
+Handicrafts{% endblock %} {% block module_imports %} import
+'/static/js/components/auction-product/auction-details.js'; import
+'/static/js/components/auction-product/auction-timer.js'; import
+'/static/js/components/auction-product/bid-section.js'; import
+'/static/js/components/auction-product/product-images.js'; import
+'/static/js/components/auction-product/product-description.js'; import
+'/static/js/components/auction-product/craftsman-info.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/websocket_utils.js';
+import '/static/js/utils/date_utils.js'; import
+'/static/js/utils/auth_utils.js'; {% endblock %} {% block content %}
+<div class="auction-page">
+  <div class="auction-header">
+    <h1>Auction Details</h1>
+    <a href="/auctions" class="back-link"
+      ><i class="fas fa-arrow-left"></i> Back to Auctions</a
+    >
+  </div>
+
+  <!-- Product ID is passed from the URL -->
+  <auction-details product-id="{{ product_id }}">
+    <div class="loading-container">
+      <i class="fas fa-spinner fa-pulse"></i>
+      <p>Loading auction details...</p>
+    </div>
+  </auction-details>
+</div>
+
+<style>
+  body {
+    background-color: #3e2723;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .auction-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .auction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #5d4037;
+    padding-bottom: 1rem;
+  }
+
+  .back-link {
+    color: #ffd700;
+    text-decoration: none;
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: 2rem;
+    background-color: #5d4037;
+    border-radius: 8px;
+  }
+
+  .loading-container i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ffd700;
+  }
+</style>
+{% endblock %}

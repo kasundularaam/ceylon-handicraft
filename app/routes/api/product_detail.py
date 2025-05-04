@@ -256,7 +256,7 @@ async def create_order(order: OrderRequest, request: Request, db: Session = Depe
             product_id=order.product_id,
             quantity=order.quantity,
             unit_price=product.base_price,
-            status=OrderStatus.PENDING
+            status=OrderStatus.INITIATED
         )
 
         db.add(order_item)

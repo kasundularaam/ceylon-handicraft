@@ -17,6 +17,7 @@ from app.routes.api.product_api import router as product_api_router
 from app.routes.api.craftsman_api import router as craftsman_api_router
 from app.routes.api.vishva_api import router as vishva_api_router
 from app.routes.api.product_detail import router as product_detail_router
+from app.routes.api.auction_product import router as auction_product_router
 
 # Define lifespan context manager
 
@@ -55,6 +56,7 @@ app.include_router(product_api_router)
 app.include_router(craftsman_api_router)
 app.include_router(vishva_api_router)
 app.include_router(product_detail_router)
+app.include_router(auction_product_router)
 
 if __name__ == "__main__":
     import uvicorn

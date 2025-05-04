@@ -160,7 +160,7 @@ async def sale_product_detail(request: Request, product_id: str):
 @router.get("/auction/{product_id}", response_class=HTMLResponse)
 async def auction_product_detail(request: Request, product_id: str):
     return templates.TemplateResponse(
-        "pages/products/product_detail.html",
+        "pages/products/auction-product.html",
         {"request": request, "product_id": product_id, "product_type": "auction"}
     )
 
