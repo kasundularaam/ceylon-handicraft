@@ -4,72 +4,67 @@ import { fetchJson } from "../../utils/api_utils.js";
 class ProductRatings extends LitElement {
   static get properties() {
     return {
-      productId: { type: String, attribute: "product-id" },
       ratings: { type: Array },
       averageRating: { type: Number },
       totalRatings: { type: Number },
+      ratingCounts: { type: Object },
       loading: { type: Boolean },
       error: { type: String },
-      ratingStats: { type: Object },
     };
   }
 
   constructor() {
     super();
-    this.productId = null;
+    // Get product ID from URL
+    const urlParts = window.location.pathname.split("/");
+    this.productId = urlParts[urlParts.length - 1];
+
     this.ratings = [];
     this.averageRating = 0;
     this.totalRatings = 0;
+    this.ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     this.loading = true;
     this.error = null;
-    this.ratingStats = {
-      5: 0,
-      4: 0,
-      3: 0,
-      2: 0,
-      1: 0,
-    };
   }
 
-  // Disable Shadow DOM to access global styles
+  // Disable Shadow DOM
   createRenderRoot() {
     return this;
   }
 
   async firstUpdated() {
-    if (this.productId) {
-      await this.fetchRatings();
-    }
+    await this.fetchRatings();
   }
 
   async fetchRatings() {
     try {
-      // Fetch ratings for this product
+      // Fetch ratings
       const response = await fetchJson(
-        `/api/products/${this.productId}/ratings`
+        `/api/product-details/${this.productId}/ratings`
       );
+      console.log("Ratings data:", response);
 
       this.ratings = response.ratings || [];
       this.totalRatings = this.ratings.length;
 
       // Calculate average rating
       if (this.totalRatings > 0) {
-        const sum = this.ratings.reduce(
-          (total, rating) => total + rating.rating,
-          0
-        );
+        let sum = 0;
+        this.ratings.forEach((rating) => {
+          sum += rating.rating;
+          // Count ratings by value
+          this.ratingCounts[rating.rating] =
+            (this.ratingCounts[rating.rating] || 0) + 1;
+        });
         this.averageRating = sum / this.totalRatings;
       }
 
-      // Calculate rating distribution
-      this.ratings.forEach((rating) => {
-        this.ratingStats[rating.rating] += 1;
-      });
-
       this.loading = false;
     } catch (error) {
-      console.error("Error fetching product ratings:", error);
-      this.error = error.message;
+      console.error("Error fetching ratings:", error);
+      // Don't show error, just show no ratings
+      this.ratings = [];
+      this.totalRatings = 0;
       this.loading = false;
     }
   }
@@ -93,6 +88,8 @@ class ProductRatings extends LitElement {
   }
 
   formatDate(dateString) {
+    if (!dateString) return "";
+
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -111,10 +108,12 @@ class ProductRatings extends LitElement {
       `;
     }
 
-    if (this.error) {
+    if (this.totalRatings === 0) {
       return html`
-        <div class="ratings-error">
-          <p>Error loading ratings: ${this.error}</p>
+        <div class="no-ratings">
+          <p>
+            This product has no reviews yet. Be the first to leave a review!
+          </p>
         </div>
       `;
     }
@@ -123,33 +122,28 @@ class ProductRatings extends LitElement {
       <div class="ratings-container">
         <div class="ratings-summary">
           <div class="average-rating">
-            <div class="average-rating-value">
-              ${this.averageRating.toFixed(1)}
-            </div>
+            <div class="average-score">${this.averageRating.toFixed(1)}</div>
             ${this.renderStars(this.averageRating)}
-            <div class="total-ratings">
+            <div class="ratings-count">
               ${this.totalRatings} rating${this.totalRatings !== 1 ? "s" : ""}
             </div>
           </div>
 
-          <div class="rating-distribution">
+          <div class="rating-bars">
             ${[5, 4, 3, 2, 1].map((stars) => {
-              const count = this.ratingStats[stars] || 0;
+              const count = this.ratingCounts[stars] || 0;
               const percentage =
                 this.totalRatings > 0 ? (count / this.totalRatings) * 100 : 0;
 
               return html`
                 <div class="rating-bar">
-                  <div class="rating-label">
+                  <div class="bar-label">
                     ${stars} <i class="fas fa-star"></i>
                   </div>
-                  <div class="rating-progress">
-                    <div
-                      class="rating-progress-fill"
-                      style="width: ${percentage}%"
-                    ></div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
                   </div>
-                  <div class="rating-count">${count}</div>
+                  <div class="bar-count">${count}</div>
                 </div>
               `;
             })}
@@ -157,61 +151,48 @@ class ProductRatings extends LitElement {
         </div>
 
         <div class="ratings-list">
-          <h3 class="ratings-list-title">Customer Reviews</h3>
+          <h3 class="ratings-title">Customer Reviews</h3>
 
-          ${this.totalRatings === 0
-            ? html`
-                <div class="no-ratings">
-                  <p>
-                    This product has no reviews yet. Be the first to leave a
-                    review!
-                  </p>
+          ${this.ratings.map(
+            (rating) => html`
+              <div class="rating-item">
+                <div class="rating-header">
+                  <div class="rating-stars">
+                    ${this.renderStars(rating.rating)}
+                  </div>
+                  <div class="rating-date">
+                    ${this.formatDate(rating.created_at)}
+                  </div>
                 </div>
-              `
-            : html`
-                ${this.ratings.map(
-                  (rating) => html`
-                    <div class="rating-item">
-                      <div class="rating-header">
-                        <div class="rating-stars">
-                          ${this.renderStars(rating.rating)}
-                        </div>
-                        <div class="rating-date">
-                          ${this.formatDate(rating.order_item.created_at)}
-                        </div>
-                      </div>
 
-                      <div class="rating-user">
-                        <i class="fas fa-user-circle"></i>
-                        <span
-                          >${rating.order_item.user.name || "Anonymous"}</span
-                        >
-                      </div>
+                <div class="rating-user">
+                  <i class="fas fa-user-circle"></i>
+                  <span>${rating.user_name || "Anonymous"}</span>
+                </div>
 
-                      ${rating.description
-                        ? html`
-                            <div class="rating-description">
-                              <p>${rating.description}</p>
+                ${rating.description
+                  ? html`
+                      <div class="rating-text">
+                        <p>${rating.description}</p>
+                      </div>
+                    `
+                  : ""}
+                ${rating.images && rating.images.length > 0
+                  ? html`
+                      <div class="rating-images">
+                        ${rating.images.map(
+                          (image) => html`
+                            <div class="rating-image">
+                              <img src="${image}" alt="Review image" />
                             </div>
                           `
-                        : ""}
-                      ${rating.images && rating.images.length > 0
-                        ? html`
-                            <div class="rating-images">
-                              ${rating.images.map(
-                                (image) => html`
-                                  <div class="rating-image">
-                                    <img src="${image}" alt="Review image" />
-                                  </div>
-                                `
-                              )}
-                            </div>
-                          `
-                        : ""}
-                    </div>
-                  `
-                )}
-              `}
+                        )}
+                      </div>
+                    `
+                  : ""}
+              </div>
+            `
+          )}
         </div>
       </div>
 
@@ -236,7 +217,7 @@ class ProductRatings extends LitElement {
           min-width: 120px;
         }
 
-        .average-rating-value {
+        .average-score {
           font-size: 3rem;
           font-weight: 700;
           color: #ffd700;
@@ -250,12 +231,12 @@ class ProductRatings extends LitElement {
           margin-bottom: 0.5rem;
         }
 
-        .total-ratings {
+        .ratings-count {
           color: #e0e0e0;
           font-size: 0.9rem;
         }
 
-        .rating-distribution {
+        .rating-bars {
           flex: 1;
           min-width: 200px;
         }
@@ -266,7 +247,7 @@ class ProductRatings extends LitElement {
           margin-bottom: 0.5rem;
         }
 
-        .rating-label {
+        .bar-label {
           width: 50px;
           color: #e0e0e0;
           font-size: 0.9rem;
@@ -275,7 +256,7 @@ class ProductRatings extends LitElement {
           gap: 0.25rem;
         }
 
-        .rating-progress {
+        .bar-track {
           flex: 1;
           height: 10px;
           background-color: #4e342e;
@@ -284,20 +265,20 @@ class ProductRatings extends LitElement {
           overflow: hidden;
         }
 
-        .rating-progress-fill {
+        .bar-fill {
           height: 100%;
           background-color: #ffd700;
           border-radius: 5px;
         }
 
-        .rating-count {
+        .bar-count {
           width: 30px;
           text-align: right;
           color: #e0e0e0;
           font-size: 0.9rem;
         }
 
-        .ratings-list-title {
+        .ratings-title {
           color: #ffffff;
           font-size: 1.5rem;
           margin: 1.5rem 0 1rem;
@@ -331,11 +312,11 @@ class ProductRatings extends LitElement {
           margin-bottom: 0.8rem;
         }
 
-        .rating-description {
+        .rating-text {
           margin-bottom: 0.8rem;
         }
 
-        .rating-description p {
+        .rating-text p {
           margin: 0;
           line-height: 1.5;
         }
@@ -368,8 +349,7 @@ class ProductRatings extends LitElement {
           color: #e0e0e0;
         }
 
-        .ratings-loading,
-        .ratings-error {
+        .ratings-loading {
           display: flex;
           flex-direction: column;
           align-items: center;

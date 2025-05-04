@@ -14,7 +14,7 @@ class ProductGallery extends LitElement {
     this.activeIndex = 0;
   }
 
-  // Disable Shadow DOM to access global styles
+  // Disable Shadow DOM
   createRenderRoot() {
     return this;
   }
@@ -35,28 +35,27 @@ class ProductGallery extends LitElement {
   render() {
     if (!this.images || this.images.length === 0) {
       return html`
-        <div class="product-gallery-empty">
+        <div class="gallery-empty">
           <img
             src="/static/images/placeholder-product.jpg"
-            alt="Product image not available"
+            alt="No image available"
           />
         </div>
       `;
     }
 
     return html`
-      <div class="product-gallery-container">
-        <div class="product-gallery-main">
+      <div class="gallery">
+        <div class="main-image">
           <img
             src="${this.images[this.activeIndex]}"
-            alt="Product image ${this.activeIndex + 1}"
-            class="main-image"
+            alt="Product main image"
           />
         </div>
 
         ${this.images.length > 1
           ? html`
-              <div class="product-gallery-thumbnails">
+              <div class="thumbnails">
                 ${this.images.map(
                   (image, index) => html`
                     <div
@@ -65,10 +64,7 @@ class ProductGallery extends LitElement {
                         : ""}"
                       @click=${() => this.selectImage(index)}
                     >
-                      <img
-                        src="${image}"
-                        alt="Product thumbnail ${index + 1}"
-                      />
+                      <img src="${image}" alt="Thumbnail ${index + 1}" />
                     </div>
                   `
                 )}
@@ -78,13 +74,13 @@ class ProductGallery extends LitElement {
       </div>
 
       <style>
-        .product-gallery-container {
+        .gallery {
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
 
-        .product-gallery-main {
+        .main-image {
           background-color: #5d4037;
           border-radius: 8px;
           overflow: hidden;
@@ -94,14 +90,14 @@ class ProductGallery extends LitElement {
           min-height: 300px;
         }
 
-        .main-image {
+        .main-image img {
           width: 100%;
           height: auto;
           object-fit: contain;
           max-height: 400px;
         }
 
-        .product-gallery-thumbnails {
+        .thumbnails {
           display: flex;
           gap: 0.5rem;
           flex-wrap: wrap;
@@ -132,7 +128,7 @@ class ProductGallery extends LitElement {
           object-fit: cover;
         }
 
-        .product-gallery-empty {
+        .gallery-empty {
           background-color: #5d4037;
           border-radius: 8px;
           overflow: hidden;
@@ -142,7 +138,7 @@ class ProductGallery extends LitElement {
           min-height: 300px;
         }
 
-        .product-gallery-empty img {
+        .gallery-empty img {
           width: 100%;
           height: auto;
           opacity: 0.7;

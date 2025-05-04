@@ -4,7 +4,6 @@ import { fetchJson } from "../../utils/api_utils.js";
 class ProductDetail extends LitElement {
   static get properties() {
     return {
-      productId: { type: String, attribute: "product-id" },
       product: { type: Object },
       images: { type: Array },
       loading: { type: Boolean },
@@ -15,10 +14,9 @@ class ProductDetail extends LitElement {
 
   constructor() {
     super();
-    // Extract product ID from URL
-    const urlPath = window.location.pathname;
-    const pathParts = urlPath.split("/");
-    this.productId = pathParts[pathParts.length - 1];
+    // Get product ID from URL
+    const urlParts = window.location.pathname.split("/");
+    this.productId = urlParts[urlParts.length - 1];
 
     this.product = null;
     this.images = [];
@@ -27,29 +25,28 @@ class ProductDetail extends LitElement {
     this.activeImageIndex = 0;
   }
 
-  // Disable Shadow DOM to access global styles
+  // Disable Shadow DOM
   createRenderRoot() {
     return this;
   }
 
   async firstUpdated() {
-    if (this.productId) {
-      await this.fetchProductData();
-    }
+    await this.fetchProductData();
   }
 
   async fetchProductData() {
     try {
-      // Fetch product data
-      this.product = await fetchJson(`/api/products/${this.productId}`);
+      // Fetch product details
+      this.product = await fetchJson(`/api/product-details/${this.productId}`);
+      console.log("Product data:", this.product);
 
       // Fetch product images
       const imagesResponse = await fetchJson(
-        `/api/product/${this.productId}/images`
+        `/api/product-details/${this.productId}/images`
       );
-      this.images = imagesResponse.images;
+      this.images = imagesResponse.images || [];
 
-      // If no images are available, use a placeholder
+      // Use placeholder if no images
       if (this.images.length === 0) {
         this.images = ["/static/images/placeholder-product.jpg"];
       }
@@ -107,11 +104,7 @@ class ProductDetail extends LitElement {
 
           <div class="product-category">
             <span class="category-label">Category:</span>
-            <span class="category-value"
-              >${this.product.category
-                ? this.product.category.title
-                : "Uncategorized"}</span
-            >
+            <span class="category-value">${this.product.category_title}</span>
           </div>
 
           <div class="product-price">

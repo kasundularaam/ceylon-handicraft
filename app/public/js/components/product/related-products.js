@@ -4,8 +4,6 @@ import { fetchJson } from "../../utils/api_utils.js";
 class RelatedProducts extends LitElement {
   static get properties() {
     return {
-      productId: { type: String, attribute: "product-id" },
-      categoryId: { type: String, attribute: "category-id" },
       products: { type: Array },
       loading: { type: Boolean },
       error: { type: String },
@@ -14,14 +12,16 @@ class RelatedProducts extends LitElement {
 
   constructor() {
     super();
-    this.productId = null;
-    this.categoryId = null;
+    // Get product ID from URL
+    const urlParts = window.location.pathname.split("/");
+    this.productId = urlParts[urlParts.length - 1];
+
     this.products = [];
     this.loading = true;
     this.error = null;
   }
 
-  // Disable Shadow DOM to access global styles
+  // Disable Shadow DOM
   createRenderRoot() {
     return this;
   }
@@ -32,22 +32,18 @@ class RelatedProducts extends LitElement {
 
   async fetchRelatedProducts() {
     try {
-      // If we have a category ID, fetch products from that category
-      // Otherwise, fetch featured products
-      const endpoint = this.categoryId
-        ? `/api/products/category/${this.categoryId}?limit=4&exclude=${this.productId}`
-        : `/api/featured/sale?limit=4`;
+      // Fetch related products - new simplified API endpoint
+      const relatedProducts = await fetchJson(
+        `/api/product-details/related/${this.productId}`
+      );
+      console.log("Related products:", relatedProducts);
 
-      const products = await fetchJson(endpoint);
-
-      // For each product, fetch the first image
+      // Fetch first image for each product
       const productsWithImages = await Promise.all(
-        products.map(async (product) => {
-          if (product.id === this.productId) return null;
-
+        relatedProducts.map(async (product) => {
           try {
             const imagesResponse = await fetchJson(
-              `/api/product/${product.id}/images`
+              `/api/product-details/${product.id}/images`
             );
             return {
               ...product,
@@ -69,11 +65,7 @@ class RelatedProducts extends LitElement {
         })
       );
 
-      // Filter out null values (the current product) and limit to 4 items
-      this.products = productsWithImages
-        .filter((product) => product !== null)
-        .slice(0, 4);
-
+      this.products = productsWithImages;
       this.loading = false;
     } catch (error) {
       console.error("Error fetching related products:", error);
@@ -92,7 +84,7 @@ class RelatedProducts extends LitElement {
   render() {
     if (this.loading) {
       return html`
-        <div class="related-products-loading">
+        <div class="related-loading">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Loading related products...</p>
         </div>
@@ -101,39 +93,36 @@ class RelatedProducts extends LitElement {
 
     if (this.error) {
       return html`
-        <div class="related-products-error">
-          <p>Error loading related products: ${this.error}</p>
+        <div class="related-error">
+          <p>Error loading related products. Please try again later.</p>
         </div>
       `;
     }
 
     if (this.products.length === 0) {
       return html`
-        <div class="related-products-empty">
+        <div class="related-empty">
           <p>No related products found.</p>
         </div>
       `;
     }
 
     return html`
-      <div class="related-products-container">
+      <div class="related-grid">
         ${this.products.map(
           (product) => html`
-            <div class="related-product-card">
+            <div class="product-card">
               <a href="/products/${product.id}" class="product-link">
-                <div class="product-image-container">
-                  <img
-                    src="${product.image}"
-                    alt="${product.title}"
-                    class="product-image"
-                  />
+                <div class="product-image">
+                  <img src="${product.image}" alt="${product.title}" />
                 </div>
 
-                <div class="product-details">
+                <div class="product-info">
                   <h3 class="product-title">${product.title}</h3>
                   <p class="product-price">
                     ${this.formatPrice(product.base_price)}
                   </p>
+                  <p class="product-category">${product.category_title}</p>
                 </div>
               </a>
             </div>
@@ -142,21 +131,21 @@ class RelatedProducts extends LitElement {
       </div>
 
       <style>
-        .related-products-container {
+        .related-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 1.5rem;
           margin: 1rem 0;
         }
 
-        .related-product-card {
+        .product-card {
           background-color: #5d4037;
           border-radius: 8px;
           overflow: hidden;
           transition: transform 0.3s ease;
         }
 
-        .related-product-card:hover {
+        .product-card:hover {
           transform: translateY(-5px);
         }
 
@@ -166,23 +155,23 @@ class RelatedProducts extends LitElement {
           display: block;
         }
 
-        .product-image-container {
+        .product-image {
           height: 180px;
           overflow: hidden;
         }
 
-        .product-image {
+        .product-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           transition: transform 0.3s ease;
         }
 
-        .related-product-card:hover .product-image {
+        .product-card:hover .product-image img {
           transform: scale(1.05);
         }
 
-        .product-details {
+        .product-info {
           padding: 1rem;
         }
 
@@ -198,12 +187,19 @@ class RelatedProducts extends LitElement {
         .product-price {
           color: #ffd700;
           font-weight: 600;
-          margin: 0;
+          margin: 0 0 0.25rem 0;
         }
 
-        .related-products-loading,
-        .related-products-error,
-        .related-products-empty {
+        .product-category {
+          color: #e0e0e0;
+          font-size: 0.8rem;
+          margin: 0;
+          opacity: 0.8;
+        }
+
+        .related-loading,
+        .related-error,
+        .related-empty {
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -213,18 +209,18 @@ class RelatedProducts extends LitElement {
           text-align: center;
         }
 
-        .related-products-loading i {
+        .related-loading i {
           font-size: 1.5rem;
           margin-bottom: 0.5rem;
           color: #ffd700;
         }
 
         @media (max-width: 768px) {
-          .related-products-container {
+          .related-grid {
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
           }
 
-          .product-image-container {
+          .product-image {
             height: 140px;
           }
         }

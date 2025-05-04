@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}{{ product_title }} - Ceylon
+{% extends "base.html" %} {% block title %}Product Details - Ceylon
 Handicrafts{% endblock %} {% block module_imports %} import
 '/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
 '/static/js/components/product/product-detail.js'; import
@@ -10,21 +10,18 @@ content %}
 <div class="product-page">
   <div class="product-container">
     <!-- Product Detail Component -->
-    <product-detail product-id="{{ product_id }}"></product-detail>
+    <product-detail></product-detail>
 
     <!-- Related Products Section -->
     <section class="related-products-section">
       <h2 class="section-title">You May Also Like</h2>
-      <related-products
-        product-id="{{ product_id }}"
-        category-id="{{ category_id }}"
-      ></related-products>
+      <related-products></related-products>
     </section>
 
     <!-- Product Ratings Section -->
     <section class="ratings-section">
       <h2 class="section-title">Customer Reviews</h2>
-      <product-ratings product-id="{{ product_id }}"></product-ratings>
+      <product-ratings></product-ratings>
     </section>
   </div>
 </div>

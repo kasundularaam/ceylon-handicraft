@@ -37,11 +37,17 @@ export async function fetchJson(url, options = {}) {
 }
 
 // Post data to API with authentication
-export async function postJson(url, data, options = {}) {
+export async function postJson(url, data = {}, customOptions = {}) {
+  // Check if we're using custom options (including body and headers)
+  if (customOptions.body || customOptions.headers) {
+    return fetchJson(url, customOptions);
+  }
+
+  // Default JSON post
   return fetchJson(url, {
     method: "POST",
     body: JSON.stringify(data),
-    ...options,
+    ...customOptions,
   });
 }
 

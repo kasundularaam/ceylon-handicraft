@@ -1,148 +1,160 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 import os
 from ...database import get_db
-from ...models import Product, ProductType, Rating, OrderItem, Category
+from ...models import Product, ProductType, Rating, OrderItem, Category, User, CartItem, OrderStatus
+from datetime import datetime
+import uuid
 
-# Create router for product detail API endpoints
+# Create models for request bodies
+
+
+class CartItemRequest(BaseModel):
+    product_id: str
+    quantity: int = 1
+
+
+class OrderRequest(BaseModel):
+    product_id: str
+    quantity: int = 1
+
+
+# Create router
 router = APIRouter()
 
-# Get product by ID
+# Get product details
 
 
-@router.get("/api/products/{product_id}")
+@router.get("/api/product-details/{product_id}")
 async def get_product(product_id: str, db: Session = Depends(get_db)):
-    """Get detailed information about a specific product by ID."""
+    """Get product details by ID"""
+    # Get product
     product = db.query(Product).filter(Product.id == product_id).first()
-
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    # Get product category
-    category = product.category
-    category_data = None
-    if category:
-        category_data = {
-            "id": category.id,
-            "title": category.title,
-            "image": category.image,
-            "icon": category.icon,
-            "description": category.description
-        }
+    # Get category separately (direct query)
+    category_title = "Uncategorized"
+    if product.category_id:
+        category = db.query(Category).filter(
+            Category.id == product.category_id).first()
+        if category:
+            category_title = category.title
 
-    # Create product data
-    product_data = {
+    # Build response
+    response = {
         "id": product.id,
         "title": product.title,
         "description": product.description,
         "base_price": product.base_price,
         "type": product.type.value,
         "category_id": product.category_id,
-        "user_id": product.user_id,
+        "category_title": category_title,  # Include category title directly
         "weight": product.weight,
         "length": product.length,
         "width": product.width,
-        "height": product.height,
-        "created_at": str(product.created_at),
-        "updated_at": str(product.updated_at),
-        "category": category_data,
-        "craftsman": {
-            "id": product.craftsman.id,
-            "name": product.craftsman.name
-        } if product.craftsman else None
+        "height": product.height
     }
 
-    return product_data
+    return response
 
 # Get product images
 
 
-@router.get("/api/product/{product_id}/images")
+@router.get("/api/product-details/{product_id}/images")
 async def get_product_images(product_id: str):
-    """Scan the product's image directory and return a list of image file paths."""
-    # Define the product images directory
+    """Get all images for a product"""
+    # Define image directory
     images_dir = Path("app/public/images/products") / product_id
 
     # Check if directory exists
     if not os.path.exists(images_dir):
-        # Try an alternative path
+        # Try alternative path
         images_dir = Path("public/images/products") / product_id
         if not os.path.exists(images_dir):
             return {"images": []}
 
-    # Get all image files in the directory
+    # Get all image files
     image_files = []
-    if os.path.exists(images_dir):
-        for file in os.listdir(images_dir):
-            if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
-                # Return the path as it would be accessed via the static route
-                image_files.append(
-                    f"/static/images/products/{product_id}/{file}")
+    for file in os.listdir(images_dir):
+        if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
+            image_files.append(f"/static/images/products/{product_id}/{file}")
 
     return {"images": image_files}
 
-# Get related products by category
+# Get related products
 
 
-@router.get("/api/products/category/{category_id}")
-async def get_category_products(
-    category_id: str,
+@router.get("/api/product-details/related/{product_id}")
+async def get_related_products(
+    product_id: str,
     limit: int = Query(4, description="Number of products to return"),
-    exclude: str = Query(
-        None, description="Product ID to exclude from results"),
     db: Session = Depends(get_db)
 ):
-    """Get products in the same category, optionally excluding a specific product."""
-    query = db.query(Product).filter(Product.category_id == category_id)
+    """Get products related to the given product"""
+    # Get current product to find category_id
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
 
-    if exclude:
-        query = query.filter(Product.id != exclude)
+    # Get products from same category
+    query = db.query(Product).filter(
+        Product.category_id == product.category_id,
+        Product.id != product_id,  # Exclude current product
+        Product.type == ProductType.SALE  # Only sale products
+    ).order_by(Product.created_at.desc())
 
-    products = query.order_by(Product.created_at.desc()).limit(limit).all()
+    related_products = query.limit(limit).all()
 
-    # Prepare response data
+    # If not enough products, get some featured products
+    if len(related_products) < limit:
+        more_needed = limit - len(related_products)
+        # Get IDs of products we already have
+        existing_ids = [p.id for p in related_products] + [product_id]
+
+        # Get more products
+        more_products = db.query(Product).filter(
+            Product.id.notin_(existing_ids),
+            Product.type == ProductType.SALE
+        ).order_by(Product.created_at.desc()).limit(more_needed).all()
+
+        related_products.extend(more_products)
+
+    # Format response
     result = []
-    for product in products:
-        # Get product category
-        category = product.category
-        category_data = None
-        if category:
-            category_data = {
-                "id": category.id,
-                "title": category.title,
-                "image": category.image,
-                "icon": category.icon,
-                "description": category.description
-            }
+    for p in related_products:
+        # Get category title
+        category_title = "Uncategorized"
+        if p.category_id:
+            category = db.query(Category).filter(
+                Category.id == p.category_id).first()
+            if category:
+                category_title = category.title
 
-        # Create product data
-        product_data = {
-            "id": product.id,
-            "title": product.title,
-            "base_price": product.base_price,
-            "type": product.type.value,
-            "category_id": product.category_id,
-            "image_paths": [],  # Empty list - will be fetched by frontend
-            "category": category_data
-        }
-        result.append(product_data)
+        result.append({
+            "id": p.id,
+            "title": p.title,
+            "base_price": p.base_price,
+            "category_title": category_title
+        })
 
     return result
 
 # Get product ratings
 
 
-@router.get("/api/products/{product_id}/ratings")
+@router.get("/api/product-details/{product_id}/ratings")
 async def get_product_ratings(product_id: str, db: Session = Depends(get_db)):
-    """Get all ratings for a specific product, including user information."""
+    """Get ratings for a product"""
     # Check if product exists
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    # Get ratings for this product through order items
+    # Get ratings through order items
     ratings = (
         db.query(Rating)
         .join(OrderItem, OrderItem.id == Rating.order_item_id)
@@ -150,44 +162,113 @@ async def get_product_ratings(product_id: str, db: Session = Depends(get_db)):
         .all()
     )
 
-    # Prepare rating data
-    rating_list = []
+    # Format ratings
+    result = []
     for rating in ratings:
-        try:
-            # Get order item and user data
-            order_item = rating.order_item
-            user_data = None
-            order_item_data = None
+        user_name = "Anonymous"
+        created_at = None
 
-            if order_item:
-                user = order_item.user if hasattr(order_item, 'user') else None
+        # Try to get user and date info
+        if hasattr(rating, 'order_item') and rating.order_item:
+            if hasattr(rating.order_item, 'user') and rating.order_item.user:
+                user_name = rating.order_item.user.name or "Anonymous"
+            if hasattr(rating.order_item, 'created_at'):
+                created_at = str(rating.order_item.created_at)
 
-                if user:
-                    user_data = {
-                        "id": user.id,
-                        "name": getattr(user, 'name', 'Anonymous')
-                    }
+        result.append({
+            "id": rating.id,
+            "rating": rating.rating,
+            "description": rating.description,
+            "user_name": user_name,
+            "created_at": created_at,
+            "images": rating.images if hasattr(rating, 'images') else []
+        })
 
-                order_item_data = {
-                    "id": order_item.id,
-                    "created_at": str(order_item.created_at),
-                    "user": user_data
-                }
+    return {"ratings": result}
 
-            # Create rating data
-            rating_data = {
-                "id": rating.id,
-                "order_item_id": rating.order_item_id,
-                "rating": rating.rating,
-                "description": rating.description,
-                "images": rating.images if hasattr(rating, 'images') else [],
-                "order_item": order_item_data
-            }
+# Add to cart
 
-            rating_list.append(rating_data)
-        except Exception as e:
-            # Skip ratings with errors
-            print(f"Error processing rating {rating.id}: {str(e)}")
-            continue
 
-    return {"ratings": rating_list}
+@router.post("/api/cart/add")
+async def add_to_cart(cart_item: CartItemRequest, request: Request, db: Session = Depends(get_db)):
+    """Add a product to the user's cart"""
+    # Get authenticated user from request state
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        # Check if product exists
+        product = db.query(Product).filter(
+            Product.id == cart_item.product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+
+        # Check if item already in cart
+        existing_item = db.query(CartItem).filter(
+            CartItem.user_id == user.id,
+            CartItem.product_id == cart_item.product_id
+        ).first()
+
+        if existing_item:
+            # Update quantity
+            existing_item.quantity += cart_item.quantity
+            existing_item.updated_at = datetime.now()
+        else:
+            # Create new cart item
+            new_cart_item = CartItem(
+                user_id=user.id,
+                product_id=cart_item.product_id,
+                quantity=cart_item.quantity
+            )
+            db.add(new_cart_item)
+
+        db.commit()
+        return {"success": True, "message": "Product added to cart"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Create an order with "Buy Now"
+
+
+@router.post("/api/orders/buy-now")
+async def create_order(order: OrderRequest, request: Request, db: Session = Depends(get_db)):
+    """Create a new order directly from product page"""
+    # Get authenticated user from request state
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        # Check if product exists
+        product = db.query(Product).filter(
+            Product.id == order.product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+
+        # Create new order item
+        order_id = str(uuid.uuid4())  # Generate unique order ID
+
+        order_item = OrderItem(
+            id=order_id,
+            user_id=user.id,
+            product_id=order.product_id,
+            quantity=order.quantity,
+            unit_price=product.base_price,
+            status=OrderStatus.PENDING
+        )
+
+        db.add(order_item)
+        db.commit()
+
+        # Return order info
+        return {
+            "success": True,
+            "order_id": order_id,
+            "message": "Order created successfully",
+            "redirect_url": f"/checkout/{order_id}"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
