@@ -180,7 +180,7 @@ class VishvaIntro extends LitElement {
                 techniques, and cultural significance behind each treasured
                 artisan creation.
               </p>
-              <a href="/vishva" class="vishva-cta">
+              <a href="/vishva/chats" class="vishva-cta">
                 <span>Start a Conversation</span>
                 <i class="fas fa-chevron-right"></i>
               </a>

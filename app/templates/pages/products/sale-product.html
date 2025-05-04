@@ -1,0 +1,66 @@
+{% extends "base.html" %} {% block title %}{{ product_title }} - Ceylon
+Handicrafts{% endblock %} {% block module_imports %} import
+'/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
+'/static/js/components/product/product-detail.js'; import
+'/static/js/components/product/product-gallery.js'; import
+'/static/js/components/product/product-buy.js'; import
+'/static/js/components/product/product-ratings.js'; import
+'/static/js/components/product/related-products.js'; {% endblock %} {% block
+content %}
+<div class="product-page">
+  <div class="product-container">
+    <!-- Product Detail Component -->
+    <product-detail product-id="{{ product_id }}"></product-detail>
+
+    <!-- Related Products Section -->
+    <section class="related-products-section">
+      <h2 class="section-title">You May Also Like</h2>
+      <related-products
+        product-id="{{ product_id }}"
+        category-id="{{ category_id }}"
+      ></related-products>
+    </section>
+
+    <!-- Product Ratings Section -->
+    <section class="ratings-section">
+      <h2 class="section-title">Customer Reviews</h2>
+      <product-ratings product-id="{{ product_id }}"></product-ratings>
+    </section>
+  </div>
+</div>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .product-page {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .product-container {
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .section-title {
+    color: #ffd700;
+    font-size: 1.8rem;
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #5d4037;
+  }
+
+  .related-products-section,
+  .ratings-section {
+    margin-top: 3rem;
+  }
+</style>
+{% endblock %}

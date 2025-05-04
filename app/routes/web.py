@@ -152,7 +152,7 @@ async def about(request: Request):
 @router.get("/sale/{product_id}", response_class=HTMLResponse)
 async def sale_product_detail(request: Request, product_id: str):
     return templates.TemplateResponse(
-        "pages/products/product_detail.html",
+        "pages/products/sale-product.html",
         {"request": request, "product_id": product_id, "product_type": "sale"}
     )
 

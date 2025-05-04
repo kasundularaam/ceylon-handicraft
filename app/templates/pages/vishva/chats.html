@@ -1,11 +1,12 @@
 {% extends "base.html" %} {% block title %}Vishva Chats - Ceylon Handicrafts{%
 endblock %} {% block module_imports %} import
+'/static/js/components/landing/landing-navbar.js'; import
 '/static/js/components/vishva/chat-list.js'; import
 '/static/js/components/vishva/new-chat-button.js'; import
 '/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; {%
 endblock %} {% block content %}
 <div class="vishva-page">
-  <app-header></app-header>
+  <landing-navbar></landing-navbar>
 
   <div class="vishva-container">
     <h1 class="vishva-title">Chat with Vishva</h1>
