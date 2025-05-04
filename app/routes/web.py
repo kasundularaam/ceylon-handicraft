@@ -193,3 +193,11 @@ async def vishva_chat(request: Request, id: str = None):
         "pages/vishva/chat.html",
         {"request": request, "chat_id": id or ""}
     )
+
+
+@router.get("/cart", response_class=HTMLResponse)
+async def cart_page(request: Request):
+    return templates.TemplateResponse(
+        "pages/buyer/cart.html",
+        {"request": request}
+    )

@@ -12,18 +12,13 @@ import '/static/js/utils/date_utils.js'; import
 <div class="auction-page">
   <div class="auction-header">
     <h1>Auction Details</h1>
-    <a href="/auctions" class="back-link"
+    <a href="/auction" class="back-link"
       ><i class="fas fa-arrow-left"></i> Back to Auctions</a
     >
   </div>
 
   <!-- Product ID is passed from the URL -->
-  <auction-details product-id="{{ product_id }}">
-    <div class="loading-container">
-      <i class="fas fa-spinner fa-pulse"></i>
-      <p>Loading auction details...</p>
-    </div>
-  </auction-details>
+  <auction-details product-id="{{ product_id }}"> </auction-details>
 </div>
 
 <style>
@@ -51,19 +46,6 @@ import '/static/js/utils/date_utils.js'; import
   .back-link {
     color: #ffd700;
     text-decoration: none;
-  }
-
-  .loading-container {
-    text-align: center;
-    padding: 2rem;
-    background-color: #5d4037;
-    border-radius: 8px;
-  }
-
-  .loading-container i {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #ffd700;
   }
 </style>
 {% endblock %}

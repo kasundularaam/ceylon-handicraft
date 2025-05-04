@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% block title %}Cart - Ceylon Handicrafts{% endblock
+%} {% block module_imports %} import '/static/js/components/cart/cart-list.js';
+import '/static/js/components/cart/cart-summary.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="cart-page">
+  <h1 class="page-title">Your Cart</h1>
+  <div class="cart-container">
+    <cart-list></cart-list>
+    <cart-summary></cart-summary>
+  </div>
+</div>
+
+<style>
+  body {
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .cart-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-title {
+    color: #ffd700;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  .cart-container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .cart-container {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}

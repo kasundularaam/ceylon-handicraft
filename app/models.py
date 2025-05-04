@@ -16,7 +16,7 @@ class UserRole(enum.Enum):
 
 class OrderStatus(enum.Enum):
     INITIATED = "Initiated"
-    PAYED = "Paid"
+    PAID = "Paid"
     ACCEPTED = "Accepted"
     DENIED = "Denied"
     DEPARTED = "Departed"
