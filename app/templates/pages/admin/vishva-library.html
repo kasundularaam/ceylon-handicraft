@@ -1,0 +1,84 @@
+{% extends "base.html" %} {% block title %}Vishva Library - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import
+'/static/js/components/vishva-library/vishva-library-manager.js'; import
+'/static/js/components/vishva-library/vishva-file-list.js'; import
+'/static/js/components/vishva-library/vishva-file-uploader.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<style>
+  :root {
+    --primary-color: #3e2723;
+    --secondary-color: #5d4037;
+    --accent-color: #ffd700;
+    --text-color: #ffffff;
+    --subtle-grey: #e0e0e0;
+  }
+
+  body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--accent-color);
+  }
+
+  .page-header h1 {
+    color: var(--accent-color);
+    margin: 0;
+  }
+
+  .back-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Vishva Library Management</h1>
+    <a href="/admin" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+    </a>
+  </div>
+
+  <!-- Vishva Library Manager component will control the entire view -->
+  <vishva-library-manager></vishva-library-manager>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  // Check if user is admin, redirect if not
+  document.addEventListener("DOMContentLoaded", function () {
+    const { isSignedIn, getRole } = window.authUtils || {};
+
+    if (typeof isSignedIn === "function" && typeof getRole === "function") {
+      if (!isSignedIn() || getRole() !== "admin") {
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+      }
+    }
+  });
+</script>
+{% endblock %}

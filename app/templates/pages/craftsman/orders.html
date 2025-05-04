@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}Orders - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import
+'/static/js/components/craftsman/craftsman-navbar.js'; import
+'/static/js/components/craftsman/order-list.js'; import
+'/static/js/components/craftsman/order-card.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="craftsman-dashboard">
+  <craftsman-navbar></craftsman-navbar>
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <h1>Order Management</h1>
+    <p>View and manage all your product orders</p>
+  </div>
+
+  <!-- Orders List Component -->
+  <order-list></order-list>
+</div>
+
+<style>
+  body {
+    background-color: #3e2723; /* Dark brown background from Ceylon Handicrafts theme */
+    color: #ffffff; /* White text for readability */
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .craftsman-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-header h1 {
+    color: #ffd700; /* Accent yellow for important headers */
+    margin-bottom: 0.5rem;
+  }
+
+  .dashboard-header p {
+    color: #e0e0e0; /* Subtle grey for secondary text */
+    margin-top: 0;
+  }
+</style>
+{% endblock %}

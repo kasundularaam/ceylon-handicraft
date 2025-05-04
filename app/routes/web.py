@@ -75,6 +75,14 @@ async def admin_category_detail(request: Request, category_id: str, mode: str = 
         {"request": request, "category_id": category_id, "mode": mode}
     )
 
+
+@router.get("/admin/vishva-library", response_class=HTMLResponse)
+async def admin_vishva_library(request: Request):
+    return templates.TemplateResponse(
+        "pages/admin/vishva-library.html",
+        {"request": request}
+    )
+
 # CRAFTSMAN PAGES
 
 
@@ -85,8 +93,6 @@ async def craftsman_dashboard(request: Request):
         {"request": request}
     )
 
-
-# Remove auth checking from web routes
 
 # Craftsman Products Routes
 @router.get("/craftsman/products", response_class=HTMLResponse)
@@ -123,6 +129,15 @@ async def craftsman_product_form(request: Request):
             "pages/craftsman/new-product.html",
             {"request": request}
         )
+
+
+@router.get("/craftsman/orders", response_class=HTMLResponse)
+async def craftsman_orders(request: Request):
+    # No auth checking - handled by client
+    return templates.TemplateResponse(
+        "pages/craftsman/orders.html",
+        {"request": request}
+    )
 
 
 @router.get("/sale", response_class=HTMLResponse)

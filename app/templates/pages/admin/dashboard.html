@@ -3,8 +3,7 @@ Handicrafts{% endblock %} {% block module_imports %} import
 '/static/js/utils/auth_utils.js'; import '/static/js/utils/api_utils.js'; import
 '/static/js/components/admin/admin-navbar.js'; import
 '/static/js/components/admin/admin-insights.js'; import
-'/static/js/components/admin/admin-sales-chart.js'; import
-'/static/js/components/admin/admin-recent-orders.js'; {% endblock %} {% block
+'/static/js/components/admin/admin-sales-chart.js'; {% endblock %} {% block
 content %}
 <div class="admin-dashboard">
   <admin-navbar></admin-navbar>
@@ -22,11 +21,6 @@ content %}
         <h2>Sales Chart (Last 5 Days)</h2>
         <admin-sales-chart days="5"></admin-sales-chart>
       </div>
-    </div>
-
-    <div class="recent-orders">
-      <h2>Recent Orders</h2>
-      <admin-recent-orders limit="10"></admin-recent-orders>
     </div>
   </div>
 </div>
@@ -83,20 +77,6 @@ content %}
   }
 
   .chart-container h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-
-  .recent-orders {
-    margin-top: 2rem;
-    background-color: #5d4037;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-
-  .recent-orders h2 {
     font-size: 1.2rem;
     margin-top: 0;
     margin-bottom: 1rem;
