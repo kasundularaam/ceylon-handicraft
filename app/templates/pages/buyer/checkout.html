@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block title %}Checkout - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import
+'/static/js/components/checkout/checkout-summary.js'; import
+'/static/js/components/checkout/payment-methods.js'; import
+'/static/js/utils/api_utils.js'; import '/static/js/utils/auth_utils.js'; {%
+endblock %} {% block content %}
+<div class="checkout-page">
+  <h1 class="page-title">Checkout</h1>
+  <div class="checkout-container">
+    <checkout-summary></checkout-summary>
+    <payment-methods></payment-methods>
+  </div>
+</div>
+
+<style>
+  body {
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .checkout-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-title {
+    color: #ffd700;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  .checkout-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .checkout-page {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}

@@ -201,3 +201,11 @@ async def cart_page(request: Request):
         "pages/buyer/cart.html",
         {"request": request}
     )
+
+
+@router.get("/checkout", response_class=HTMLResponse)
+async def checkout_page(request: Request):
+    return templates.TemplateResponse(
+        "pages/buyer/checkout.html",
+        {"request": request}
+    )
