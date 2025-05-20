@@ -7,15 +7,6 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-
-    user = request.state.user
-    if user:
-        # Redirect to dashboard based on user role
-        if user.role == "Admin":
-            return RedirectResponse("/admin")
-        if user.role == "Craftsman":
-            return RedirectResponse("/craftsman")
-
     return templates.TemplateResponse(
         "index.html",
         {"request": request}

@@ -14,10 +14,7 @@ endblock %} {% block content %}
 
   <!-- Featured Sale Products Section -->
   <div class="content-container">
-    <featured-products-section
-      title="Featured Products For Sale (Test Deploy CD)"
-      type="sale"
-    >
+    <featured-products-section title="Featured Products For Sale" type="sale">
     </featured-products-section>
   </div>
 
@@ -59,4 +56,13 @@ endblock %} {% block content %}
     padding: 0 20px;
   }
 </style>
+{% endblock %} {% block scripts %}
+<script type="module">
+  import { redirectBasedOnRole } from "/static/js/utils/auth_utils.js";
+
+  // Check authentication and redirect on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    redirectBasedOnRole();
+  });
+</script>
 {% endblock %}

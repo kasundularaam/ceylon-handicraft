@@ -66,3 +66,18 @@ export function getRole() {
   const user = getUser();
   return user ? user.role : null;
 }
+
+// Redirect based on user role
+export function redirectBasedOnRole() {
+  if (!isSignedIn()) return;
+
+  const role = getRole();
+
+  if (role === "Admin") {
+    window.location.href = "/admin";
+  } else if (role === "Craftsman") {
+    window.location.href = "/craftsman";
+  } else {
+    window.location.href = "/";
+  }
+}
