@@ -23,46 +23,61 @@ jobs:
             REPO_URL="https://github.com/kasundularaam/ceylon-handicraft-web-v10.git"
             PROJECT_PATH="/var/www/ceylon-handicraft-web-v10"
             SERVICE_NAME="ceylon-handicrafts"
+            VENV_PATH="/var/www/venv/ceylon-handicraft"
 
             echo "Starting Ceylon Handicrafts deployment..."
 
-            # Navigate to project directory (create if it doesn't exist)
+            # Create project directory if it doesn't exist
             mkdir -p $PROJECT_PATH
             cd $PROJECT_PATH
 
-            # Check if repo is already cloned
+            # Better check for Git repository
             if [ ! -d ".git" ]; then
-                echo "Cloning repository for the first time..."
-                # Clone the repository
+                echo "Setting up Git repository..."
+                # If directory is not empty, initialize git and set remote
+                rm -rf * .[^.]*
                 git clone $REPO_URL .
             else
-                echo "Repository already exists, pulling latest changes..."
-                # Pull latest changes
+                echo "Repository exists, pulling latest changes..."
+                # Reset any local changes and pull latest
+                git reset --hard
+                git clean -fd
                 git pull
             fi
 
-            # Install dependencies
+            # Create and use virtual environment for Python packages
+            echo "Setting up Python environment..."
+            if [ ! -d "$VENV_PATH" ]; then
+                # Make sure python3-venv is installed
+                apt-get update && apt-get install -y python3-venv
+                # Create virtual environment
+                python3 -m venv $VENV_PATH
+            fi
+
+            # Activate virtual environment and install dependencies
             echo "Installing dependencies..."
+            source $VENV_PATH/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt
 
             # Set up systemd service if it doesn't exist
             if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
                 echo "Setting up systemd service..."
-                cat > /etc/systemd/system/$SERVICE_NAME.service << 'EOSVC'
+                cat > /etc/systemd/system/$SERVICE_NAME.service << EOF
             [Unit]
             Description=Ceylon Handicrafts FastAPI service
             After=network.target
 
             [Service]
             User=root
-            WorkingDirectory=/var/www/ceylon-handicraft-web-v10
-            ExecStart=/usr/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+            WorkingDirectory=$PROJECT_PATH
+            ExecStart=$VENV_PATH/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
             Restart=always
             RestartSec=5
 
             [Install]
             WantedBy=multi-user.target
-            EOSVC
+            EOF
                 systemctl daemon-reload
                 systemctl enable $SERVICE_NAME
             else
@@ -72,7 +87,7 @@ jobs:
             # Check nginx config
             if [ ! -f "/etc/nginx/sites-available/ceylon-handicrafts" ]; then
                 echo "Setting up Nginx configuration..."
-                cat > /etc/nginx/sites-available/ceylon-handicrafts << 'EONGINX'
+                cat > /etc/nginx/sites-available/ceylon-handicrafts << EOF
             server {
                 listen 80;
                 server_name ceylonhandicraft.com www.ceylonhandicraft.com 172.104.165.223;
@@ -80,20 +95,21 @@ jobs:
                 location / {
                     proxy_pass http://127.0.0.1:8000;
                     proxy_http_version 1.1;
-                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Upgrade \$http_upgrade;
                     proxy_set_header Connection "upgrade";
-                    proxy_set_header Host $host;
-                    proxy_set_header X-Real-IP $remote_addr;
-                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto \$scheme;
                 }
             }
-            EONGINX
+            EOF
                 ln -sf /etc/nginx/sites-available/ceylon-handicrafts /etc/nginx/sites-enabled/
             fi
 
             # Restart the service
             echo "Restarting service..."
+            systemctl daemon-reload
             systemctl restart $SERVICE_NAME
 
             # Reload nginx
