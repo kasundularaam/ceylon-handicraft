@@ -21,7 +21,7 @@ class LibraryFileResponse(BaseModel):
     path: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 router = APIRouter(prefix="/api/vishva-library")
