@@ -1,0 +1,103 @@
+name: Deploy to Linode
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Linode
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USERNAME }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          port: ${{ secrets.LINODE_PORT || 22 }}
+          script: |
+            # Project settings
+            REPO_URL="https://github.com/kasundularaam/ceylon-handicraft-web-v10.git"
+            PROJECT_PATH="/var/www/ceylon-handicraft-web-v10"
+            SERVICE_NAME="ceylon-handicrafts"
+
+            echo "Starting Ceylon Handicrafts deployment..."
+
+            # Navigate to project directory (create if it doesn't exist)
+            mkdir -p $PROJECT_PATH
+            cd $PROJECT_PATH
+
+            # Check if repo is already cloned
+            if [ ! -d ".git" ]; then
+                echo "Cloning repository for the first time..."
+                # Clone the repository
+                git clone $REPO_URL .
+            else
+                echo "Repository already exists, pulling latest changes..."
+                # Pull latest changes
+                git pull
+            fi
+
+            # Install dependencies
+            echo "Installing dependencies..."
+            pip install -r requirements.txt
+
+            # Set up systemd service if it doesn't exist
+            if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
+                echo "Setting up systemd service..."
+                cat > /etc/systemd/system/$SERVICE_NAME.service << 'EOSVC'
+            [Unit]
+            Description=Ceylon Handicrafts FastAPI service
+            After=network.target
+
+            [Service]
+            User=root
+            WorkingDirectory=/var/www/ceylon-handicraft-web-v10
+            ExecStart=/usr/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+            Restart=always
+            RestartSec=5
+
+            [Install]
+            WantedBy=multi-user.target
+            EOSVC
+                systemctl daemon-reload
+                systemctl enable $SERVICE_NAME
+            else
+                echo "Systemd service already exists"
+            fi
+
+            # Check nginx config
+            if [ ! -f "/etc/nginx/sites-available/ceylon-handicrafts" ]; then
+                echo "Setting up Nginx configuration..."
+                cat > /etc/nginx/sites-available/ceylon-handicrafts << 'EONGINX'
+            server {
+                listen 80;
+                server_name ceylonhandicraft.com www.ceylonhandicraft.com 172.104.165.223;
+                
+                location / {
+                    proxy_pass http://127.0.0.1:8000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                }
+            }
+            EONGINX
+                ln -sf /etc/nginx/sites-available/ceylon-handicrafts /etc/nginx/sites-enabled/
+            fi
+
+            # Restart the service
+            echo "Restarting service..."
+            systemctl restart $SERVICE_NAME
+
+            # Reload nginx
+            echo "Reloading Nginx..."
+            systemctl reload nginx
+
+            echo "Deployment completed successfully!"
