@@ -83,13 +83,15 @@ jobs:
               sed -i "s|WorkingDirectory=.*|WorkingDirectory=$PROJECT_PATH|g" /etc/systemd/system/$SERVICE_NAME.service
             fi
 
-            # Check nginx config
-            if [ ! -f "/etc/nginx/sites-available/ceylon-handicrafts" ]; then
-              echo "Setting up Nginx configuration..."
-              cat > /etc/nginx/sites-available/ceylon-handicrafts << EOF
+            # Always update the Nginx configuration
+            echo "Updating Nginx configuration..."
+            cat > /etc/nginx/sites-available/ceylon-handicrafts << EOF
             server {
                 listen 80;
                 server_name ceylonhandicraft.com www.ceylonhandicraft.com 172.104.165.223;
+                
+                # Set maximum allowed request body size to 10MB
+                client_max_body_size 10M;
                 
                 location / {
                     proxy_pass http://127.0.0.1:8000;
@@ -103,8 +105,9 @@ jobs:
                 }
             }
             EOF
-              ln -sf /etc/nginx/sites-available/ceylon-handicrafts /etc/nginx/sites-enabled/
-            fi
+
+            # Make sure the config is linked in sites-enabled
+            ln -sf /etc/nginx/sites-available/ceylon-handicrafts /etc/nginx/sites-enabled/
 
             # Reload systemd configuration
             systemctl daemon-reload
