@@ -162,6 +162,14 @@ class FeaturedProducts extends LitElement {
     }
   }
 
+  // Format price with currency
+  formatPrice(price) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "LKR",
+    }).format(price);
+  }
+
   render() {
     return html`
       <section class="section featured-products">
@@ -274,9 +282,9 @@ class FeaturedProducts extends LitElement {
                             <div class="product-info">
                               <div class="product-header">
                                 <h3 class="product-title">${product.title}</h3>
-                                <span class="product-price"
-                                  >$${product.price.toFixed(2)}</span
-                                >
+                                <span class="product-price">
+                                  ${this.formatPrice(this.product.price)}
+                                </span>
                               </div>
                               <div class="product-footer">
                                 <div class="product-rating">
