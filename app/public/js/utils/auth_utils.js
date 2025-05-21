@@ -77,7 +77,5 @@ export function redirectBasedOnRole() {
     window.location.href = "/admin";
   } else if (role === "Craftsman") {
     window.location.href = "/craftsman";
-  } else {
-    window.location.href = "/";
   }
 }
