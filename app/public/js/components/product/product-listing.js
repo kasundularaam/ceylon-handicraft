@@ -1,6 +1,7 @@
 import { LitElement, html } from "https://esm.run/lit";
 import { fetchJson } from "../../utils/api_utils.js";
-import "../landing/featured-products-section.js";
+import "../../components/global/auction-product-card.js";
+import "../../components/global/sale-product-card.js";
 
 class ProductListing extends LitElement {
   static get properties() {
@@ -47,19 +48,18 @@ class ProductListing extends LitElement {
     this.fetchFilterOptions();
 
     // Add event listener for browser back button
-    window.addEventListener("popstate", () => {
-      this.parseUrlParams();
-      this.fetchProducts();
-    });
+    window.addEventListener("popstate", this.handlePopState);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener("popstate", () => {
-      this.parseUrlParams();
-      this.fetchProducts();
-    });
+    window.removeEventListener("popstate", this.handlePopState);
   }
+
+  handlePopState = () => {
+    this.parseUrlParams();
+    this.fetchProducts();
+  };
 
   parseUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -71,11 +71,18 @@ class ProductListing extends LitElement {
 
   updateUrlParams() {
     const urlParams = new URLSearchParams();
-    if (this.currentPage > 1)
+    if (this.currentPage > 1) {
       urlParams.set("page", this.currentPage.toString());
-    if (this.category) urlParams.set("category", this.category);
-    if (this.searchQuery) urlParams.set("search", this.searchQuery);
-    if (this.sortBy !== "newest") urlParams.set("sort", this.sortBy);
+    }
+    if (this.category) {
+      urlParams.set("category", this.category);
+    }
+    if (this.searchQuery) {
+      urlParams.set("search", this.searchQuery);
+    }
+    if (this.sortBy !== "newest") {
+      urlParams.set("sort", this.sortBy);
+    }
 
     const newUrl = `${window.location.pathname}${
       urlParams.toString() ? "?" + urlParams.toString() : ""
@@ -122,21 +129,23 @@ class ProductListing extends LitElement {
 
       // Fetch image paths for each product
       const products = response.products || response;
-      for (let i = 0; i < products.length; i++) {
-        try {
-          const imageData = await fetchJson(
-            `/api/landing/product/${products[i].id}/images`
-          );
-          products[i].image_paths = imageData.images;
-          products[i].currentImageIndex = 0; // Initialize current image index
-        } catch (error) {
-          console.error(
-            `Error fetching images for product ${products[i].id}:`,
-            error
-          );
-          products[i].image_paths = [];
-        }
-      }
+      await Promise.all(
+        products.map(async (product) => {
+          try {
+            const imageData = await fetchJson(
+              `/api/landing/product/${product.id}/images`
+            );
+            product.image_paths = imageData.images;
+            product.currentImageIndex = 0; // Initialize current image index
+          } catch (error) {
+            console.error(
+              `Error fetching images for product ${product.id}:`,
+              error
+            );
+            product.image_paths = [];
+          }
+        })
+      );
 
       this.products = products;
       this.totalPages = response.totalPages || 1;
@@ -227,6 +236,13 @@ class ProductListing extends LitElement {
   handlePageChange(newPage) {
     if (newPage < 1 || newPage > this.totalPages) return;
     this.currentPage = newPage;
+    this.fetchProducts();
+  }
+
+  handleClearFilters() {
+    this.searchQuery = "";
+    this.category = "";
+    this.currentPage = 1;
     this.fetchProducts();
   }
 
@@ -391,26 +407,40 @@ class ProductListing extends LitElement {
         </p>
         ${this.searchQuery || this.category
           ? html`
-              <button
-                @click=${() => {
-                  this.searchQuery = "";
-                  this.category = "";
-                  this.fetchProducts();
-                }}
-              >
-                Clear Filters
-              </button>
+              <button @click=${this.handleClearFilters}>Clear Filters</button>
             `
           : ""}
       </div>
     `;
   }
 
+  renderProductsGrid() {
+    return html`
+      <div class="products-grid">
+        ${this.products.map((product, index) =>
+          this.type === "auction"
+            ? html`<auction-product-card
+                .product=${product}
+                .index=${index}
+              ></auction-product-card>`
+            : html`<sale-product-card
+                .product=${product}
+                .index=${index}
+              ></sale-product-card>`
+        )}
+      </div>
+    `;
+  }
+
   render() {
-    // Use the FeaturedProductsSection component to display the products
-    // This reuses the product card rendering logic we already have
     return html`
       <div class="product-listing ${this.type}-products">
+        <div class="section-header">
+          <h2 class="section-title">
+            ${this.type === "auction" ? "Auction" : "Sale"} Products
+          </h2>
+        </div>
+
         <div class="filters-container">${this.renderFilters()}</div>
 
         ${this.loading
@@ -418,16 +448,7 @@ class ProductListing extends LitElement {
           : html`
               ${this.products.length === 0
                 ? this.renderEmptyState()
-                : html`
-                    <featured-products-section
-                      .title=${`${
-                        this.type === "auction" ? "Auction" : "Sale"
-                      } Products`}
-                      .type=${this.type}
-                      .products=${this.products}
-                      .loading=${false}
-                    ></featured-products-section>
-                  `}
+                : this.renderProductsGrid()}
               ${this.renderPagination()}
             `}
       </div>
@@ -436,6 +457,38 @@ class ProductListing extends LitElement {
         .product-listing {
           padding: 20px;
           margin-bottom: 30px;
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .section-title {
+          color: #ffffff;
+          font-size: 1.8rem;
+          margin: 0;
+          position: relative;
+          padding-left: 15px;
+        }
+
+        .section-title:before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          width: 5px;
+          background-color: #ffd700;
+          border-radius: 2px;
+        }
+
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 25px;
         }
 
         .filters-container {
@@ -639,6 +692,16 @@ class ProductListing extends LitElement {
           .category-filter,
           .sort-filter {
             width: 100%;
+          }
+
+          .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          }
+        }
+
+        @media (max-width: 480px) {
+          .products-grid {
+            grid-template-columns: 1fr;
           }
         }
       </style>

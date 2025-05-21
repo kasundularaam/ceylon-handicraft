@@ -333,7 +333,7 @@ class BidSection extends LitElement {
                   ? html`
                       <p class="login-prompt">
                         <a
-                          href="/login?redirect=${encodeURIComponent(
+                          href="/auth/login?redirect=${encodeURIComponent(
                             window.location.pathname
                           )}"
                           >Login</a
