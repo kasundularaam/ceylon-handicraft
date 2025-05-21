@@ -182,6 +182,13 @@ class FeaturedProductsSection extends LitElement {
     }
   }
 
+  formatPrice(price) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "LKR",
+    }).format(price);
+  }
+
   renderLoading() {
     return html`
       <div class="loading-container">
@@ -286,11 +293,13 @@ class FeaturedProductsSection extends LitElement {
                       Current Bid:
                     </div>
                     <div class="bid-value">
-                      $${(product.current_bid || product.base_price).toFixed(2)}
+                      ${this.formatPrice(
+                        product.current_bid || product.base_price
+                      )}
                     </div>
                   </div>
                   <div class="base-price">
-                    Starting at: $${product.base_price.toFixed(2)}
+                    Starting at: ${this.formatPrice(product.base_price)}
                   </div>
                 </div>
               `
@@ -299,7 +308,7 @@ class FeaturedProductsSection extends LitElement {
                   <div class="price">
                     <span class="price-label">Price:</span>
                     <span class="price-value"
-                      >$${product.base_price.toFixed(2)}</span
+                      >${this.formatPrice(product.base_price)}</span
                     >
                   </div>
                 </div>
