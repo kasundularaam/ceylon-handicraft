@@ -112,7 +112,7 @@ class RelatedProducts extends LitElement {
         ${this.products.map(
           (product) => html`
             <div class="product-card">
-              <a href="/products/${product.id}" class="product-link">
+              <a href="/sale/${product.id}" class="product-link">
                 <div class="product-image">
                   <img src="${product.image}" alt="${product.title}" />
                 </div>
