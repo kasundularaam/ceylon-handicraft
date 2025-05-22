@@ -224,3 +224,11 @@ async def checkout_page(request: Request):
         "pages/buyer/checkout.html",
         {"request": request}
     )
+
+
+@router.get("/categories/{category_id}", response_class=HTMLResponse)
+async def category_page(request: Request, category_id: str):
+    return templates.TemplateResponse(
+        "pages/category/category.html",
+        {"request": request}
+    )

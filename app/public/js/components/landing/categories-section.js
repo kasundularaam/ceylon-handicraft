@@ -474,7 +474,7 @@ class CategoriesSection extends LitElement {
   }
 
   navigateToCategory(categoryId) {
-    window.location.href = `/category/${categoryId}`;
+    window.location.href = `/categories/${categoryId}`;
   }
 }
 

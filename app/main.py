@@ -23,6 +23,7 @@ from app.routes.api.cart_api import router as cart_api_router
 from app.routes.api.checkout_api import router as checkout_api_router
 from app.routes.api.vishva_library import router as vishva_library_router
 from app.routes.api.craftsman_order import router as craftsman_order_router
+from app.routes.api.categories_api import router as categories_api_router
 # Define lifespan context manager
 
 
@@ -66,6 +67,7 @@ app.include_router(cart_api_router)
 app.include_router(checkout_api_router)
 app.include_router(vishva_library_router)
 app.include_router(craftsman_order_router)
+app.include_router(categories_api_router)
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,48 @@
+{% extends "base.html" %} {% block title %}Category - Ceylon Handicrafts{%
+endblock %} {% block module_imports %} import '/static/js/utils/auth_utils.js';
+import '/static/js/utils/api_utils.js'; import
+'/static/js/components/global/sale-product-card.js'; import
+'/static/js/components/global/auction-product-card.js'; import
+'/static/js/components/categories/category-header.js'; import
+'/static/js/components/categories/category-products.js'; {% endblock %} {% block
+content %}
+<div class="category-page">
+  <div class="category-container">
+    <!-- Category Header Component -->
+    <category-header></category-header>
+
+    <!-- Category Products Component -->
+    <category-products></category-products>
+  </div>
+</div>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: #3e2723;
+    color: #ffffff;
+  }
+
+  .category-page {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .category-container {
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .section-title {
+    color: #ffd700;
+    font-size: 1.8rem;
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #5d4037;
+  }
+</style>
+{% endblock %}
