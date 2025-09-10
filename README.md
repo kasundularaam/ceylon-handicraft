@@ -76,8 +76,8 @@ Built entirely using the **Flash Feather framework** - a custom LLM-friendly web
 
 1. **Clone Repository**
    ```bash
-   git clone <repository-url>
-   cd ceylon-handicrafts
+   git clone https://github.com/kasundularaam/ceylon-handicraft.git
+   cd ceylon-handicraft
    ```
 
 2. **Create Virtual Environment**
