@@ -1,19 +1,26 @@
 # Ceylon Handicrafts Online Marketplace
 
+[![Flash Feather](https://img.shields.io/badge/Built%20with-Flash%20Feather-orange.svg)](https://github.com/kasundularaam/flash-feather-starter)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![Lit.js](https://img.shields.io/badge/Lit.js-3.0+-orange.svg)](https://lit.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A specialized e-commerce platform connecting Sri Lankan artisans with global consumers, offering authentic handcrafted products through an immersive digital experience that celebrates the rich heritage of Ceylon's traditional craftsmanship.
 
-**Live Site**: [ceylonhandicraft.com](http://ceylonhandicraft.com)  
-**Author**: Gimhan Ramanayake
+> **🏗️ Built with [Flash Feather Framework](https://github.com/kasundularaam/flash-feather-starter)** - An experimental LLM-friendly web framework designed for rapid development.
+
+> **📝 Note**: The live site is no longer running, but this serves as a portfolio demonstration of the Flash Feather framework capabilities.
 
 ## 🎯 Project Vision
 
-Ceylon Handicrafts transcends the traditional marketplace model by creating an immersive digital environment that captures the essence of Sri Lankan craftsmanship while leveraging modern technology to enhance user experience. Unlike conventional marketplaces, our platform offers a cultural journey through thoughtful design, interactive AI assistance, and direct connections between craftspeople and buyers.
+Ceylon Handicrafts transcends the traditional marketplace model by creating an immersive digital environment that captures the essence of Sri Lankan craftsmanship while leveraging modern technology to enhance user experience. This project demonstrates the power of the Flash Feather framework for building complex e-commerce applications with AI integration.
 
 ## ✨ Key Features
 
 ### 🛍️ Marketplace Functionality
 - **Dual Sales Models**: Both direct sales and auction-based purchasing
-- **Product Categories**: Wood carvings, Sri Lankan masks, textiles, metalwork, pottery, lacquerware, and more
+- **Product Categories**: Wood carvings, Sri Lankan masks, textiles, metalwork, pottery, lacquerware
 - **Advanced Filtering**: Sort by price, popularity, category, and product type
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 
@@ -32,24 +39,27 @@ Ceylon Handicrafts transcends the traditional marketplace model by creating an i
 ### 👥 User Experience
 - **Artisan Profiles**: Direct connection with craftspeople and their stories
 - **Product Discovery**: Categories, search, and recommendation systems
-- **Secure Transactions**: JWT-based authentication with no expiration
+- **Secure Transactions**: JWT-based authentication with Flash Feather's auth system
 - **Order Management**: Complete order tracking and management system
 
 ## 🏗️ Technology Stack
 
-### Backend
-- **Framework**: Python FastAPI with Flash Feather architecture
-- **Database**: SQLAlchemy ORM with SQLite/PostgreSQL support
-- **Authentication**: JWT tokens with secure user management
-- **Validation**: Pydantic for request/response validation
-- **File Handling**: Image upload and management system
+### Flash Feather Framework Architecture
+Built entirely using the **Flash Feather framework** - a custom LLM-friendly web framework that combines:
 
-### Frontend
-- **Components**: Lit.js web components without Shadow DOM
-- **Templating**: Jinja2 for page structure
-- **Styling**: Custom CSS with responsive design
-- **State Management**: URL-based state persistence
-- **API Communication**: Native fetch with error handling
+- **Backend**: Python FastAPI with Flash Feather's clean architecture patterns
+- **Database**: SQLAlchemy ORM following Flash Feather conventions
+- **Authentication**: Flash Feather's JWT system with secure user management
+- **Component System**: Flash Feather's UID-based component isolation
+- **Templating**: Jinja2 with Flash Feather's template structure
+
+### Core Technologies
+- **Framework**: [Flash Feather](https://github.com/kasundularaam/flash-feather-starter) (Custom LLM-friendly framework)
+- **Database**: SQLAlchemy ORM with SQLite
+- **Frontend**: Lit.js web components with UID isolation system
+- **Styling**: CSS variables following Flash Feather's theming system
+- **AI Integration**: Google Gemini Flash 2 for Vishva AI assistant
+- **File Handling**: Flash Feather's environment-aware file management
 
 ### AI Integration
 - **LLM**: Google Gemini Flash 2 for Vishva AI assistant
@@ -60,30 +70,41 @@ Ceylon Handicrafts transcends the traditional marketplace model by creating an i
 
 ### Prerequisites
 - Python 3.8 or higher
-- pip package manager
-- Virtual environment (recommended)
+- Flash Feather framework knowledge (see [docs](https://github.com/kasundularaam/flash-feather-starter))
 
 ### Local Development Setup
 
-1. **Create Virtual Environment**
+1. **Clone Repository**
+   ```bash
+   git clone <repository-url>
+   cd ceylon-handicrafts
+   ```
+
+2. **Create Virtual Environment**
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-2. **Install Dependencies**
+3. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run Application**
+4. **Configure Environment**
    ```bash
-   cd ceylon-handicrafts
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Run Application**
+   ```bash
    python -m app.main
    ```
 
-4. **Access Application**
+6. **Access Application**
    - Frontend: http://localhost:8000
+   - Admin account auto-created on first run
 
 ## 🎨 Design System
 
@@ -94,36 +115,41 @@ Ceylon Handicrafts transcends the traditional marketplace model by creating an i
 - **Text**: White (#FFFFFF) - Primary text color
 - **Secondary Text**: Light Grey (#E0E0E0) - Subtle information
 
-### Typography
-- **Font Family**: Poppins (Google Fonts)
-- **Weights**: 300, 400, 500, 600, 700
-- **Hierarchy**: Clear heading structure with consistent sizing
+### Flash Feather Component Architecture
+Following Flash Feather's UID system for component isolation:
 
-### Component Architecture
-- **Reusable Components**: Global product cards, form elements
-- **Page-Specific Components**: Category headers, product galleries
-- **Utility Components**: Loading states, error handling
+```
+static/js/components/
+├── global/                    # Reusable components (cc01-cc10)
+├── landing/                   # Landing page components (cc11-cc20)
+├── category/                  # Category page components (cc21-cc30)
+├── product/                   # Product page components (cc31-cc40)
+└── checkout/                  # Checkout components (cc41-cc50)
+```
 
-## 🔧 Development Guidelines
+Each component follows Flash Feather's UID naming convention:
+- **File**: `{component_name}_cc{XX}.js`
+- **CSS Classes**: `.cc{XX}-{class-name}`
+- **HTML IDs**: `cc{XX}-{element-name}`
 
-### Flash Feather Principles
-1. **Minimalism**: Keep code simple and avoid unnecessary abstractions
-2. **Clean Structure**: Organized project layout with clear separation of concerns
-3. **Direct Approach**: Avoid over-engineering and unnecessary layers
-4. **LLM-Friendly**: Code patterns that work well with AI assistance
+## 📁 Project Structure
 
-### Code Standards
-- **Database Operations**: Use SQLAlchemy directly in routes for simple operations
-- **Service Layer**: Only for complex multi-step business logic
-- **Component Structure**: Lit.js components without Shadow DOM
-- **API Design**: RESTful endpoints with consistent naming
-- **Error Handling**: Comprehensive error states and user feedback
-
-### File Organization
-- Components grouped by functionality (global, landing, category, product)
-- API routes organized by domain area
-- Utility functions separated by purpose
-- Templates follow page hierarchy
+```
+ceylon-handicrafts/
+├── app/                       # Flash Feather backend structure
+│   ├── main.py               # FastAPI app with Flash Feather setup
+│   ├── database.py           # Flash Feather database configuration
+│   ├── models.py             # SQLAlchemy models
+│   ├── routes/               # API routes organized by domain
+│   ├── services/             # Business logic services
+│   └── templates/            # Jinja2 templates
+├── static/                   # Frontend assets (Flash Feather structure)
+│   ├── css/                  # CSS with Flash Feather variables
+│   └── js/components/        # UID-based Lit.js components
+├── uploads/                  # Flash Feather file storage
+├── vishva-library/           # AI knowledge base PDFs
+└── database.db              # SQLite database
+```
 
 ## 🌟 Product Categories
 
@@ -137,56 +163,79 @@ Ceylon Handicrafts transcends the traditional marketplace model by creating an i
 8. **Coir Crafts** - Items made from coconut husk fibers
 9. **Island Gem & Jewelry** - Traditional and contemporary jewelry with local gems
 
+## 🔧 Flash Feather Development Patterns
+
+This project demonstrates several Flash Feather framework capabilities:
+
+### 1. Environment-Aware Configuration
+```python
+# Automatic development/production path handling
+DATABASE_PATH = get_database_path()  # Flash Feather utility
+UPLOAD_PATH = get_uploads_path()     # Environment-aware storage
+```
+
+### 2. UID Component Isolation
+```javascript
+// cc15-product-gallery component
+class ProductGallery extends LitElement {
+  render() {
+    return html`
+      <div class="cc15-gallery">
+        <img class="cc15-main-image" />
+        <div class="cc15-thumbnails"></div>
+      </div>
+      <style>
+        .cc15-gallery { background: var(--bg); }
+        .cc15-main-image { border-radius: var(--radius-md); }
+      </style>
+    `;
+  }
+}
+```
+
+### 3. Schema-Free API Design
+```python
+# Direct request handling without separate schemas
+@router.post("/products")
+async def create_product(request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    # Direct validation and processing
+```
+
+### 4. CSS Variables Theming
+```css
+:root {
+  /* Flash Feather + Ceylon Handicrafts theme */
+  --primary: #3E2723;
+  --accent: #FFD700;
+  --bg: var(--primary);
+  --text: #FFFFFF;
+}
+```
+
 ## 🤝 Contributing
 
-We welcome contributions from developers, designers, and cultural enthusiasts who share our vision of preserving and promoting Sri Lankan handicrafts.
+This project serves as a comprehensive example of Flash Feather framework capabilities. Contributions welcome for:
 
-### Development Process
-1. Fork the repository and create a feature branch
-2. Follow the established code standards and architecture patterns
-3. Test your changes thoroughly across different devices
-4. Submit detailed pull requests with clear descriptions
-5. Participate in code reviews and address feedback
-
-### Areas of Contribution
-- **Frontend Development**: New components and user interface improvements
-- **Backend Development**: API enhancements and performance optimizations
-- **Cultural Content**: Expanding the Vishva AI knowledge base
-- **Testing**: Automated testing and quality assurance
-- **Documentation**: Improving guides and API documentation
+- **Flash Feather Enhancements**: Improvements to the framework patterns
+- **Component Library**: Additional UID-based components
+- **Performance Optimizations**: Flash Feather-specific optimizations
+- **Documentation**: Framework usage examples and best practices
 
 ## 📄 License
 
-This project is proprietary software. All rights reserved by the author and contributors. Unauthorized copying, distribution, or modification is strictly prohibited.
+MIT License - feel free to use this project as a reference for Flash Feather development.
 
-## 🎯 Future Roadmap
+## 🎯 Framework Showcase
 
-### Phase 1: Core Enhancement
-- Advanced search and filtering capabilities
-- Enhanced auction features with real-time bidding
-- Mobile application development
-- Payment gateway integration
+This project demonstrates:
 
-### Phase 2: Community Features
-- Artisan community forums
-- Customer review and rating system
-- Social sharing and wishlists
-- Newsletter and notification system
-
-### Phase 3: Global Expansion
-- Multi-language support
-- International shipping integration
-- Regional payment methods
-- Cultural exchange programs
-
-## 📞 Contact & Support
-
-For questions, feedback, or collaboration opportunities:
-
-**Author**: Gimhan Ramanayake  
-**Project**: Ceylon Handicrafts Online Marketplace  
-**Website**: [ceylonhandicraft.com](http://ceylonhandicraft.com)
+- **Full E-commerce Implementation** using Flash Feather
+- **AI Integration** with LLM-friendly patterns
+- **Component Architecture** with UID isolation system
+- **Production Deployment** with environment-aware configuration
+- **Complex State Management** using Flash Feather patterns
 
 ---
 
-*Celebrating the timeless artistry of Sri Lankan handicrafts through modern digital innovation.*
+*A portfolio demonstration of the Flash Feather framework's capabilities for building modern web applications with AI assistance.*
