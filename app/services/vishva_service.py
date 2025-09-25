@@ -23,7 +23,7 @@ from ..database import get_db
 from ..models import Chat, Message, Category, Product
 
 # Configuration Constants
-GOOGLE_API_KEY = "AIzaSyBb8nrmBBpzzG1aVH-D-jWvHHC9fTLjScs"
+GOOGLE_API_KEY = "API_KEY_HERE"
 MODEL_NAME = "gemini-2.0-flash"
 VISHVA_LIBRARY_PATH = "vishva_library"
 
